@@ -149,3 +149,5 @@ p{margin:0 0 1em}
 .form-done p{color:var(--muted);margin:0}
 .form-done a,.form-note a{color:var(--text)}
 .form button:disabled{opacity:.6;cursor:wait}
+.ig-link{display:inline-flex !important;align-items:center;gap:8px}
+.ig{flex:none}
