@@ -151,3 +151,17 @@ p{margin:0 0 1em}
 .form button:disabled{opacity:.6;cursor:wait}
 .ig-link{display:inline-flex !important;align-items:center;gap:8px}
 .ig{flex:none}
+/* reviews */
+.reviews-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.reviews-head h2{margin:0}
+.rating{text-decoration:none;color:var(--text);font-family:var(--head);font-weight:600;letter-spacing:.03em}
+.stars{color:#f5c542;letter-spacing:.12em}
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:30px}
+.review{margin:0;background:var(--bg3);border:1px solid var(--line);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:14px}
+.review blockquote{margin:0;color:var(--text);font-size:1rem;line-height:1.6;flex:1}
+.review figcaption{font-family:var(--head);font-weight:600;color:var(--text)}
+.review figcaption span{color:var(--steel2);font-weight:500}
+.reviews-more{margin:24px 0 0}
+.reviews-more a{color:var(--text)}
+@media (max-width:960px){.reviews{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.reviews{grid-template-columns:1fr}}
