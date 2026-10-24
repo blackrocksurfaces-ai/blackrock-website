@@ -183,3 +183,11 @@ p{margin:0 0 1em}
 .announce .wrap{display:flex;align-items:center;justify-content:center;gap:10px;padding-top:9px;padding-bottom:9px;text-align:center}
 .announce svg{flex:none}
 @media (max-width:640px){.announce{font-size:.78rem;letter-spacing:.01em}.announce .wrap{gap:7px}}
+/* collapse the nav a little earlier so the longer menu never wraps */
+@media (max-width:1080px){
+  .nav-toggle{display:block}
+  .nav{position:absolute;top:74px;left:0;right:0;background:#0b0b0c;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;gap:0;padding:8px 20px 18px;display:none}
+  .nav.open{display:flex}
+  .nav a{padding:12px 0;border-bottom:1px solid #1d1d21}
+  .nav a.btn{margin-top:12px;text-align:center;border-bottom:none}
+}

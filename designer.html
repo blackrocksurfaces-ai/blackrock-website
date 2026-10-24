@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Floor Designer | BlackRock Surface Co.</title>
+<meta name="description" content="Design your epoxy floor online. Pick a flake blend or metallic finish, preview it in a garage, and send your choices for a free quote in Calgary.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta property="og:title" content="Floor Designer | BlackRock Surface Co.">
+<meta property="og:description" content="Design your epoxy floor online. Pick a flake blend or metallic finish, preview it in a garage, and send your choices for a free quote in Calgary.">
+<meta property="og:image" content="img/garage.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=d3f1a9c2">
+<style>
+/* Floor designer (page-specific; shared look comes from styles.css) */
+.dz{padding:48px 0 90px}
+.dz-intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px 40px;margin-bottom:28px}
+.dz-intro h1{margin:0}
+.dz-intro .lead{margin:0;max-width:52ch}
+.dz .grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.dz .grid{grid-template-columns:minmax(0,1fr)}}
+.dz .stage{position:sticky;top:90px;display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:860px){.dz .stage{position:static}}
+.dz .view{position:relative;border-radius:var(--radius);overflow:hidden;background:#2a2a2c;aspect-ratio:16/10;border:1px solid var(--line)}
+.dz .view canvas{display:block;width:100%;height:100%}
+.dz .viewtabs{position:absolute;top:10px;left:10px;display:flex;gap:4px;background:rgba(10,10,11,.75);padding:4px;border-radius:999px}
+.dz .viewtabs button{font:600 13px var(--body);color:var(--text);background:transparent;border:0;padding:6px 12px;border-radius:999px;cursor:pointer;min-height:32px}
+.dz .viewtabs button[aria-pressed="true"]{background:var(--text);color:#0a0a0b}
+.dz .busy{position:absolute;right:12px;top:14px;font:600 12px var(--body);color:var(--text);background:rgba(10,10,11,.75);padding:4px 10px;border-radius:999px}
+.dz .summary,.dz-steps,.dz fieldset{background:var(--bg3);border:1px solid var(--line);border-radius:var(--radius)}
+.dz .summary{padding:20px;display:flex;flex-direction:column;gap:12px}
+.dz .summary h2,.dz-steps h2{font-size:1.35rem;margin:0}
+.dz .spec{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;margin:0}
+.dz .spec dt{color:var(--muted);font-size:.85rem}
+.dz .spec dd{margin:0;font-weight:600}
+.dz .quote{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.dz .quote .btn{cursor:pointer}
+.dz .phone{font:700 1.5rem var(--head);user-select:all;letter-spacing:.02em;margin:0}
+.dz .phone a{color:var(--text);text-decoration:none}
+.dz-note{font-size:.85rem;color:var(--muted);margin:0}
+.dz-note a{color:var(--text)}
+.dz .panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.dz fieldset{padding:14px 16px 18px;margin:0;min-width:0}
+.dz legend{font:600 1.1rem var(--head);padding:0 6px;letter-spacing:.02em}
+.dz .hint{margin:2px 0 10px;color:var(--muted);font-size:.85rem}
+.dz .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.dz .opt{position:relative}
+.dz .opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.dz .opt label{display:flex;flex-direction:column;gap:2px;border:1px solid #33353b;border-radius:6px;padding:10px 12px;cursor:pointer;min-height:44px;height:100%;background:var(--bg2)}
+.dz .opt label b{font-weight:600}
+.dz .opt label span{font-size:.8rem;color:var(--muted);line-height:1.35}
+.dz .opt input:checked + label{border-color:var(--steel);box-shadow:inset 0 0 0 1px var(--steel);background:#222226}
+.dz .opt input:focus-visible + label{outline:2px solid #9a9ea6;outline-offset:2px}
+.dz .opt input:disabled + label{opacity:.4;cursor:not-allowed}
+.dz .group-name{font:600 .75rem var(--head);letter-spacing:.18em;text-transform:uppercase;color:var(--steel2);margin:14px 0 6px}
+.dz .group-name:first-of-type{margin-top:0}
+.dz .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.dz .sw label{padding:6px;gap:5px;font-size:.8rem;font-weight:600;line-height:1.2}
+.dz .sw .chip{display:block;width:100%;aspect-ratio:3/2;border-radius:4px;background-size:cover;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.dz .tag{font-size:.68rem;font-weight:700;color:var(--steel);letter-spacing:.04em}
+.dz .scroll{max-height:420px;overflow:auto;padding-right:4px;margin-right:-4px}
+.dz .mix-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.dz .mix-pill{font-size:.8rem;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.dz-steps{padding:20px}
+.dz-steps ol{margin:12px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:10px}
+.dz-steps li b{display:block}
+.dz-steps li span{color:var(--muted);font-size:.9rem}
+.dz [hidden]{display:none!important}
+@media (max-width:640px){.dz{padding:32px 0 70px}}
+@media (prefers-reduced-motion: reduce){.dz *{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="index.html" aria-label="BlackRock Surface Co. home"><img src="img/logo-header.png" alt="Black Rock Surface Co"></a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav id="nav" class="nav"><a href="index.html">Home</a><a href="flake.html">Flake</a><a href="metallic.html">Metallic</a><a href="quartz.html">Quartz</a><a href="gallery.html">Gallery</a><a href="about.html">About</a><a href="faq.html">FAQ</a><a href="designer.html" aria-current="page">Design your floor</a><a class="btn btn-sm" href="contact.html">Free Quote</a></nav>
+  </div>
+</header>
+<div class="announce"><div class="wrap"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17l17.4-10M9.5 3.5L12 5.5l2.5-2M9.5 20.5l2.5-2 2.5 2M3.5 10.5l3-.5-1-3M20.5 13.5l-3 .5 1 3M3.5 13.5l3 .5-1 3M20.5 10.5l-3-.5 1-3"/></svg>Working all year long, yes that includes winter!!</div></div>
+<main>
+
+<section class="dz">
+  <div class="wrap">
+    <div class="dz-intro">
+      <div><p class="eyebrow">Floor designer</p><h1>Design your floor</h1></div>
+      <p class="lead">Pick a finish, then your colours. The preview updates as you go. When it looks right, copy your choices and text them to us for a quote.</p>
+    </div>
+    <div class="grid">
+    <div class="stage">
+      <div class="view">
+        <canvas id="scene" width="1200" height="750" aria-label="Preview of your floor"></canvas>
+        <div class="viewtabs" role="group" aria-label="Preview view">
+          <button type="button" id="v-room" aria-pressed="true">Garage view</button>
+          <button type="button" id="v-close" aria-pressed="false">Close-up</button>
+        </div>
+        <span class="busy" id="busy" hidden>Updating…</span>
+      </div>
+
+      <section class="summary" aria-labelledby="sum-h">
+        <h2 id="sum-h">Your floor</h2>
+        <dl class="spec" id="spec"></dl>
+        <div class="quote">
+          <button type="button" class="btn" id="copy">Copy my choices</button>
+          <span class="dz-note" id="copied" role="status"></span>
+        </div>
+        <p class="dz-note">Text or call Ryder at</p>
+        <p class="phone" id="phone"><a href="sms:+15874488892">587-448-8892</a></p>
+        <p class="dz-note">Or <a href="contact.html">send a quote request</a> and paste your choices into the details box.</p>
+        <p class="dz-note">Colours on screen are approximate. We’ll bring a physical sample before anything goes down, and confirm availability with your quote.</p>
+        <textarea id="quote-text" rows="4" style="width:100%;font:13px var(--body);border:1px solid #33353b;border-radius:6px;padding:8px;background:var(--bg2);color:var(--text)" aria-label="Text to send with your quote request" hidden></textarea>
+      </section>
+
+      <section class="dz-steps" aria-labelledby="steps-h">
+        <h2 id="steps-h">How your floor goes in</h2>
+        <ol id="steps"></ol>
+      </section>
+    </div>
+
+    <div class="panel">
+      <fieldset>
+        <legend>1. Finish</legend>
+        <div class="seg" id="finish"></div>
+      </fieldset>
+
+      <div id="flake-ui" class="panel">
+        <fieldset>
+          <legend>2. Flake blend</legend>
+          <p class="hint">“3 sizes” blends also come in finer chips.</p>
+          <div class="scroll" id="blends"></div>
+          <div id="mix-ui" hidden>
+            <p class="group-name" style="margin-top:12px">Your mix: pick up to 3</p>
+            <div class="swatches" id="mix-colours"></div>
+            <div class="mix-row" id="mix-chosen"></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>3. Chip size</legend>
+          <p class="hint" id="size-hint">Smaller chips give a finer, more even look.</p>
+          <div class="seg" id="sizes"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>4. Coverage</legend>
+          <p class="hint">How much of the base colour shows between the chips.</p>
+          <div class="seg" id="coverage"></div>
+        </fieldset>
+
+        <fieldset id="base-fs">
+          <legend>5. Base colour</legend>
+          <p class="hint" id="base-hint">Shows between the chips.</p>
+          <div class="swatches" id="bases"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>6. Sparkle</legend>
+          <p class="hint">Optional glitter flake mixed into the blend.</p>
+          <div class="seg" id="glitter"></div>
+        </fieldset>
+      </div>
+
+      <div id="met-ui" class="panel" hidden>
+        <fieldset>
+          <legend>2. Main colour</legend>
+          <div class="scroll" id="met-base"></div>
+        </fieldset>
+        <fieldset>
+          <legend>3. Accent colour</legend>
+          <p class="hint">Adds veining, like real marble. Optional.</p>
+          <div class="scroll" id="met-accent"></div>
+        </fieldset>
+        <fieldset>
+          <legend>4. Movement</legend>
+          <div class="seg" id="movement"></div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<script>
+(function(){
+// ---------- data (colours approximated from manufacturer descriptions) ----------
+const C={Black:"#1C1C1D",White:"#F2F2EF",Whisper:"#C9CACB",Online:"#8E9094",Alpaca:"#E8E2D6",Antique:"#E6DCC8",Charcoal:"#3C3D40",Cyber:"#4A5A6E",Neutral:"#9A9A96",DarkGrey:"#55575A",Battle:"#7B7F84",Functional:"#A7A59E",Granite:"#8A8B88",MedGray:"#7E7F80",TrueBlue:"#2F5FA8",Scone:"#C9AE8A",Oahu:"#6E4E36",Lanai:"#5B5F63",Ivory:"#EDE6D2",Ebony:"#2A2622",BIO:"#24221F",Taupe:"#9C8C7A",Choc:"#4A3022",Graphite:"#4E4F52",Jasper:"#8A4B3A",Tabu:"#6F7A5A",Cement:"#B0ADA6",Stone:"#B7AE9F",Wigwam:"#8B6A4C",Adobe:"#C4A887",Cocoa:"#5C3F2E",Putty:"#C7BCA6",Porpoise:"#8D8F92",Gravy:"#7A5A3E",Raisin:"#4A3038",Mud:"#6B5844",Somm:"#6B2E3A",Dolphin:"#8C9196",Buff:"#D7C29A",Egg:"#EFE8D6",Fossil:"#A99E8C",Autumn:"#7A4A2A",Stormy:"#5A7A96",Moody:"#3F5A7E",Yellow:"#E3C23A"};
+const R=(arr)=>arr.map(([k,w])=>[C[k]||k,w]);
+function shade(h,f){const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const o=c.map(x=>f>0?Math.round(x+(255-x)*f):Math.round(x*(1+f)));return "#"+o.map(x=>x.toString(16).padStart(2,"0")).join("")}
+const mono=h=>[[h,40],[shade(h,.18),25],[shade(h,-.18),25],[shade(h,.35),10]];
+const B=[];
+function add(group,id,name,mix,opt={}){B.push(Object.assign({group,id,name,mix},opt))}
+const G1="Greys & blacks",G2="Light & cool",G3="Earth tones",G4="Marble",G5="Terrazzo & stone",G6="Solid colours";
+add(G1,"raven","Raven",R([["Black",80],["Whisper",5],["White",5],["Online",5],["Alpaca",5]]));
+add(G1,"darkside","Darkside",R([["Black",50],["Charcoal",30],["Graphite",15],["Online",5]]),{three:1,unsure:1});
+add(G1,"nightfall","Nightfall",R([["Charcoal",40],["Black",10],["Cyber",10],["Neutral",10],["DarkGrey",10],["Battle",10],["Functional",10]]),{three:1});
+add(G1,"wombat","Wombat",R([["Charcoal",55],["Black",15],["Whisper",15],["White",15]]));
+add(G1,"stonehenge","Stonehenge",R([["Granite",20],["Charcoal",20],["Graphite",20],["Whisper",20],["White",20]]));
+add(G1,"gravel","Gravel",R([["Online",30],["Granite",25],["Charcoal",20],["Whisper",10],["White",15]]),{three:1});
+add(G1,"domino","Domino",R([["Granite",34],["Black",33],["White",33]]),{three:1});
+add(G1,"galaxy","Galaxy",R([["Online",60],["Whisper",30],["Cyber",5],["Antique",5]]));
+add(G2,"feather","Feather Grey",R([["Alpaca",30],["Online",30],["White",30],["Whisper",5],["Black",5]]));
+add(G2,"stony","Stony Creek",R([["White",20],["Alpaca",20],["Neutral",20],["Taupe",20],["Functional",10],["Charcoal",10]]));
+add(G2,"tidal","Tidal Wave",R([["White",20],["Online",20],["Alpaca",20],["Antique",20],["Stormy",10],["Moody",10]]));
+add(G2,"coyote","Coyote",R([["White",20],["Taupe",20],["Alpaca",20],["Antique",20],["Functional",10],["Black",5],["Choc",5]]),{three:1});
+add(G2,"dovetail","Dovetail",R([["Alpaca",20],["Somm",20],["Dolphin",20],["Antique",20],["Stone",20]]));
+add(G2,"rainstorm","Rainstorm",R([["Whisper",35],["Online",20],["Stormy",20],["Moody",15],["Yellow",10]]));
+add(G2,"orbit","Orbit",R([["MedGray",25],["Black",25],["TrueBlue",25],["White",25]]));
+add(G3,"cabin","Cabin Fever",R([["Granite",30],["Scone",30],["White",30],["Black",10]]),{three:1});
+add(G3,"keystone","Keystone",R([["Granite",25],["Whisper",20],["Oahu",20],["Lanai",20],["Ivory",5],["Ebony",5],["BIO",5]]));
+add(G3,"creekbed","Creekbed",R([["Antique",25],["Stone",25],["Wigwam",25],["Tabu",10],["Adobe",3],["Cocoa",3],["Putty",3],["Porpoise",3],["Gravy",3]]),{three:1});
+add(G3,"madras","Madras",R([["Wigwam",40],["Dolphin",30],["Taupe",15],["Alpaca",15]]),{three:1});
+add(G3,"shoreline","Shoreline",R([["Scone",50],["Ivory",33],["Autumn",11],["Black",6]]),{three:1});
+add(G3,"loon","Loon",R([["Fossil",14],["Adobe",13],["White",13],["Cyber",13],["BIO",13],["Buff",13],["Egg",13],["Wigwam",13]]));
+add(G3,"thyme","Thyme",R([["Cement",14],["White",13],["Charcoal",13],["Graphite",13],["Jasper",13],["Tabu",13],["Functional",13],["Taupe",13]]));
+add(G3,"sparrow","Sparrow",R([["Battle",16],["Black",14],["Cyber",14],["Raisin",14],["Choc",14],["Adobe",14],["Mud",14]]));
+[["schist","Schist","#DCDDDA"],["soapstone","Soapstone","#E9E2D3"],["pumice","Pumice","#B49A7E"],["dolerite","Dolerite","#7D7266"],["basalt","Basalt","#6F7E8A"],["lanai","Lanai Gray","#55595D"],["carbon","Carbon","#232427"]].forEach(([i,n,h])=>add(G4,"m-"+i,n,mono(h)));
+add(G5,"husky","Husky",R([["#C9CACB",35],["White",30],["#A3A6A8",20],["#E8E6E0",15]]));
+add(G5,"juneau","Juneau",R([["#B7BABD",35],["#EDEAE2",30],["#8E9196",20],["White",15]]));
+add(G5,"slate","Slate",R([["#7A7E82",30],["#5E6266",25],["#A3A6A8",25],["#3F4246",10],["#D3D4D2",10]]),{unsure:1});
+add(G5,"denali","Denali",R([["#4A3426",30],["Black",25],["#5E6266",20],["#6E5440",15],["#9A9C9E",10]]));
+const SOLIDS=[["White","#F2F2EF"],["Granite","#8A8B88"],["Battle Ship","#7B7F84"],["Charcoal","#3C3D40"],["Black","#1C1C1D"],["Powder Blue","#9DB9D6"],["Primary Blue","#1F4FA8"],["Royal Blue","#2A3F9A"],["Teal","#1F8A8A"],["JD Green","#2E7D3A"],["Primary Yellow","#F2C624"],["Orange","#E06A1E"],["Tomato","#D9452B"],["Cherry Bomb","#B3242E"],["African Violet","#6A4C8C"]];
+SOLIDS.forEach(([n,h])=>add(G6,"s-"+n.toLowerCase().replace(/\s+/g,"-"),n,mono(h)));
+add("Mix your own","mix","Custom mix",[],{custom:1});
+const BASES=[["Light Concrete","#B8B9B3"],["Mid Concrete","#8C8D88"],["Dark Concrete","#5E605E"],["Stone Concrete","#9C978B"],["White","#ECEBE6"],["Beige","#D4C4A1"],["Sand","#CBB68F"],["Tan","#B39A76"],["Beechwood","#A8865E"],["Black","#1E1E1E"],["Granit Green","#434C42"],["Pastel Blue","#7193B8"],["Sapphire Blue","#213D6B"],["Brick Red","#8B3B2D"],["Signal Red","#A9262B"],["Safety Yellow","#EDBA00"]];
+const MET=[["Great White","#EEF1F3"],["Pearl","#E9E3D6"],["Bright White","#F7F6F2"],["Satin White","#E5E1D8"],["Silver","#BFC2C5"],["Satin Grey","#8F8F8C"],["Azure","#8C9BA6"],["Overcast","#9E9A86"],["Curacao","#4F555B"],["Manatee","#565A5F"],["Whale","#44474C"],["Caviar","#17181B"],["Black","#101010"],["Black Pearl","#2B2C31"],["Sandbar","#D3C09F"],["Guava","#B79A7A"],["Royal Gold","#C8A24C"],["Rum","#8A5A34"],["Sandal","#5E3D26"],["Coffee","#4E3528"],["Chestnut Brown","#6B3A24"],["Ginger","#C0703C"],["Magic Orange","#E2742B"],["Flash Red","#BF2B2B"],["Bikini","#E0517E"],["Maui","#1C74C4"],["Flash Blue","#2E8FD6"],["Cobalt Blue","#2340A0"],["Margarita","#9EC63B"],["Flash Green","#2E9E58"]];
+const SIZES=[["1/4","1/4″ standard","Every blend"],["1/8","1/8″ fine","“3 sizes” blends"],["1/16","1/16″ extra fine","“3 sizes” blends"]];
+const COVER=[["full","Full","No base showing. Toughest, smoothest finish."],["heavy","Heavy","A little base peeks through."],["partial","Partial","Base colour shows between chips. Granite look."]];
+const GLIT=[["none","None",null],["gold","Gold",["#F2D27A","#C9993A","#FFF0B8"]],["holo","Holographic",["#F0B6D9","#B6E3F0","#E9F0B6","#FFFFFF"]],["midnight","Midnight",["#2B3360","#4A5590","#9AA6E0"]]];
+const MOVE=[["calm","Calm","Soft, gentle swirls"],["flow","Flowing","Classic marble movement"],["bold","Bold","Dramatic, high contrast"]];
+
+// ---------- state ----------
+const state={finish:"flake",blend:"domino",size:"1/4",cover:"full",base:"Mid Concrete",glitter:"none",mix:["#1C1C1D","#F2F2EF","#8A8B88"],mixNames:["Black","White","Granite"],metBase:"Whale",metAccent:"Pearl",move:"flow",view:"room"};
+try{const s=JSON.parse(localStorage.getItem("floor-design")||"null");if(s)Object.assign(state,s)}catch(e){}
+const save=()=>{try{localStorage.setItem("floor-design",JSON.stringify(state))}catch(e){}};
+
+// ---------- helpers ----------
+function hashStr(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0}
+function rng(seed){let a=hashStr(String(seed));return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const el=id=>document.getElementById(id);
+const blendById=id=>B.find(b=>b.id===id)||B[0];
+function currentMix(){const b=blendById(state.blend);if(b.custom){const m=state.mix.length?state.mix:["#8A8B88"];return m.map(h=>[h,1])}return b.mix}
+function dominant(mix){return mix.reduce((a,b)=>b[1]>a[1]?b:a)[0]}
+
+// ---------- flake texture ----------
+function flakeTile(size,{mix,bg,cover,chip,glitter,seed}){
+  const cv=document.createElement("canvas");cv.width=cv.height=size;const x=cv.getContext("2d");
+  x.fillStyle=bg;x.fillRect(0,0,size,size);
+  const r=rng(seed);const total=mix.reduce((s,m)=>s+m[1],0);
+  const pick=()=>{let v=r()*total;for(const [h,w] of mix){if((v-=w)<0)return h}return mix[0][0]};
+  const area=chip*chip*0.55;const d={full:2.7,heavy:2.3,partial:1.05}[cover];
+  const n=Math.min(160000,Math.round(d*size*size/area));
+  const paths=new Map();
+  for(let i=0;i<n;i++){
+    const h=pick();let p=paths.get(h);if(!p){p=new Path2D();paths.set(h,p)}
+    const cx=r()*size,cy=r()*size,rad=chip*(0.5+0.45*r()),a0=r()*6.283;
+    const pts=[];for(let j=0;j<4;j++){const a=a0+j*1.5708+(r()-.5)*.9,rr=rad*(0.6+0.45*r());pts.push([cx+rr*Math.cos(a),cy+rr*Math.sin(a)])}
+    const offs=[[0,0]];if(cx<rad)offs.push([size,0]);if(cx>size-rad)offs.push([-size,0]);if(cy<rad)offs.push([0,size]);if(cy>size-rad)offs.push([0,-size]);
+    for(const [ox,oy] of offs){p.moveTo(pts[0][0]+ox,pts[0][1]+oy);for(let j=1;j<4;j++)p.lineTo(pts[j][0]+ox,pts[j][1]+oy);p.closePath()}
+  }
+  for(const [h,p] of paths){x.fillStyle=h;x.fill(p)}
+  const g=GLIT.find(q=>q[0]===glitter);
+  if(g&&g[2]){const gn=Math.round(n*0.05),s=Math.max(1,chip*0.35);for(let i=0;i<gn;i++){x.fillStyle=g[2][Math.floor(r()*g[2].length)];x.fillRect(r()*size,r()*size,s,s)}}
+  return cv;
+}
+function flakeOpts(chipScale){
+  const mix=currentMix();const chip={"1/4":1,"1/8":0.52,"1/16":0.3}[state.size]*chipScale;
+  const base=(BASES.find(b=>b[0]===state.base)||BASES[1])[1];
+  return{mix,bg:state.cover==="full"?dominant(mix):base,cover:state.cover,chip:Math.max(1.4,chip),glitter:state.glitter,seed:state.blend+state.size+state.cover+state.mix.join("")};
+}
+
+// ---------- metallic texture ----------
+function metallicField(w,h,baseHex,accHex,move,seed){
+  const r=rng(seed);const P=new Uint8Array(512);const perm=[...Array(256).keys()];for(let i=255;i>0;i--){const j=Math.floor(r()*(i+1));[perm[i],perm[j]]=[perm[j],perm[i]]}for(let i=0;i<512;i++)P[i]=perm[i&255];
+  const V=new Float32Array(256);for(let i=0;i<256;i++)V[i]=r();
+  const sm=t=>t*t*(3-2*t);
+  function n2(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;const a=V[P[(xi&255)+P[yi&255]]],b=V[P[((xi+1)&255)+P[yi&255]]],c=V[P[(xi&255)+P[(yi+1)&255]]],d=V[P[((xi+1)&255)+P[(yi+1)&255]]];const u=sm(xf),v=sm(yf);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
+  const fbm=(x,y)=>{let s=0,a=.5,f=1;for(let o=0;o<4;o++){s+=a*n2(x*f,y*f);f*=2.03;a*=.5}return s/0.9375};
+  const warp={calm:1.6,flow:3.6,bold:6}[move],sc={calm:2.2,flow:2.8,bold:3.2}[move],con={calm:.7,flow:1,bold:1.35}[move];
+  const base=rgb(baseHex),acc=accHex?rgb(accHex):null;
+  const lum=(base[0]*.3+base[1]*.59+base[2]*.11)/255;
+  const light=base.map(c=>c+(255-c)*(lum>.8?.15:.42)),dark=base.map(c=>c*(lum<.15?.55:.62));
+  const img=new ImageData(w,h);const D=img.data;
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){
+    const x=i/w*sc*1.6,y=j/h*sc;
+    const qx=fbm(x,y),qy=fbm(x+5.2,y+1.3);
+    const rx=fbm(x+warp*qx+1.7,y+warp*qy+9.2),ry=fbm(x+warp*qx+8.3,y+warp*qy+2.8);
+    let v=fbm(x+warp*rx,y+warp*ry);v=Math.min(1,Math.max(0,.5+(v-.5)*1.8*con));
+    let c;
+    if(v<.45){const t=v/.45;c=dark.map((d,k)=>d+(base[k]-d)*t)}
+    else if(v<.62){const t=(v-.45)/.17;c=base.map((b,k)=>b+(light[k]-b)*t)}
+    else{const t=Math.min(1,(v-.62)/.38);c=light.map((l,k)=>l+(base[k]-l)*t*.6)}
+    if(acc){const vein=Math.max(0,1-Math.abs(rx-.55)*{calm:9,flow:12,bold:10}[move]);const m=Math.pow(vein,1.6)*.92;c=c.map((q,k)=>q+(acc[k]-q)*m)}
+    const o=(j*w+i)*4;D[o]=c[0];D[o+1]=c[1];D[o+2]=c[2];D[o+3]=255;
+  }
+  const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").putImageData(img,0,0);return cv;
+}
+let metCache={key:"",cv:null};
+function metallicSurface(){
+  const key=state.metBase+"|"+state.metAccent+"|"+state.move;
+  if(metCache.key!==key){const b=MET.find(m=>m[0]===state.metBase)[1];const a=state.metAccent==="None"?null:MET.find(m=>m[0]===state.metAccent)[1];metCache={key,cv:metallicField(300,420,b,a,state.move,key)}}
+  return metCache.cv;
+}
+
+// ---------- scene drawing ----------
+const scene=el("scene"),sx=scene.getContext("2d");const W=1200,H=750,Y0=318;
+function floorSource(){
+  const src=document.createElement("canvas");src.width=1600;src.height=2400;const x=src.getContext("2d");
+  if(state.finish==="flake"){const tile=flakeTile(256,flakeOpts(5.2));x.fillStyle=x.createPattern(tile,"repeat");x.fillRect(0,0,1600,2400)}
+  else{x.imageSmoothingQuality="high";x.drawImage(metallicSurface(),0,0,1600,2400)}
+  return src;
+}
+function drawRoom(){
+  const src=floorSource();
+  sx.clearRect(0,0,W,H);
+  const far=0.35,bx=(W-W*1.5*far)/2;
+  // ceiling + walls
+  let g=sx.createLinearGradient(0,0,0,Y0);g.addColorStop(0,"#C9C6C0");g.addColorStop(1,"#E3E0DA");sx.fillStyle=g;sx.fillRect(0,0,W,H);
+  const yEdge=Y0+(H-Y0)*((1/1.5-far)/(1-far));
+  sx.fillStyle="#D5D2CB";sx.beginPath();sx.moveTo(0,0);sx.lineTo(bx,40);sx.lineTo(bx,Y0);sx.lineTo(0,yEdge);sx.closePath();sx.fill();
+  sx.fillStyle="#CFCBC4";sx.beginPath();sx.moveTo(W,0);sx.lineTo(W-bx,40);sx.lineTo(W-bx,Y0);sx.lineTo(W,yEdge);sx.closePath();sx.fill();
+  sx.fillStyle="#BEBAB3";sx.fillRect(0,0,W,40);
+  // garage door on back wall
+  const dx=bx+30,dw=W-2*bx-60,dy=78;g=sx.createLinearGradient(0,dy,0,Y0);g.addColorStop(0,"#F3F2EF");g.addColorStop(1,"#E2E0DB");sx.fillStyle=g;sx.fillRect(dx,dy,dw,Y0-dy);
+  sx.strokeStyle="rgba(0,0,0,.14)";sx.lineWidth=2;for(let i=1;i<4;i++){const y=dy+(Y0-dy)*i/4;sx.beginPath();sx.moveTo(dx,y);sx.lineTo(dx+dw,y);sx.stroke()}
+  sx.strokeStyle="rgba(0,0,0,.08)";sx.lineWidth=1;for(let i=0;i<4;i++)for(let k=0;k<5;k++){const y=dy+(Y0-dy)*i/4+8,hh=(Y0-dy)/4-16,w=dw/5;sx.strokeRect(dx+k*w+8,y,w-16,hh)}
+  sx.fillStyle="#B9B5AD";sx.fillRect(dx-12,dy-10,dw+24,10);sx.fillRect(dx-12,dy-10,12,Y0-dy+10);sx.fillRect(dx+dw,dy-10,12,Y0-dy+10);
+  // floor with perspective, row by row
+  sx.imageSmoothingEnabled=true;sx.imageSmoothingQuality="high";
+  for(let y=Y0;y<H;y++){const t=(y-Y0)/(H-Y0),k=far+(1-far)*t,z=1/k,sy=Math.min(2399,2400*(1/far-z)/(1/far-1)),dw2=W*1.5*k;sx.drawImage(src,0,sy,1600,1,(W-dw2)/2,y,dw2,1.6)}
+  // light: reflection of the door, far shade, gloss
+  g=sx.createLinearGradient(0,Y0,0,H);g.addColorStop(0,"rgba(0,0,0,.28)");g.addColorStop(.35,"rgba(0,0,0,.06)");g.addColorStop(1,"rgba(0,0,0,.18)");sx.fillStyle=g;sx.fillRect(0,Y0,W,H-Y0);
+  g=sx.createRadialGradient(W/2,Y0+70,10,W/2,Y0+70,420);g.addColorStop(0,"rgba(255,255,255,.22)");g.addColorStop(1,"rgba(255,255,255,0)");sx.fillStyle=g;sx.fillRect(0,Y0,W,H-Y0);
+  sx.fillStyle="rgba(0,0,0,.25)";sx.fillRect(bx,Y0-3,W-2*bx,3);
+}
+function drawClose(){
+  sx.clearRect(0,0,W,H);
+  if(state.finish==="flake"){const tile=flakeTile(400,flakeOpts(12.5));sx.fillStyle=sx.createPattern(tile,"repeat");sx.fillRect(0,0,W,H)}
+  else{sx.imageSmoothingQuality="high";const s=metallicSurface();sx.drawImage(s,0,0,s.width,s.height*0.62,0,0,W,H)}
+  const g=sx.createLinearGradient(0,0,W,H);g.addColorStop(0,"rgba(255,255,255,.16)");g.addColorStop(.45,"rgba(255,255,255,0)");g.addColorStop(1,"rgba(0,0,0,.12)");sx.fillStyle=g;sx.fillRect(0,0,W,H);
+  sx.fillStyle="rgba(20,20,22,.72)";sx.fillRect(W-196,H-46,180,30);sx.fillStyle="#EEEAE2";sx.font="600 16px Inter, sans-serif";sx.fillText("About 24″ across",W-180,H-25);
+}
+let pending=0;
+function render(){
+  el("busy").hidden=false;const id=++pending;
+  requestAnimationFrame(()=>setTimeout(()=>{if(id!==pending)return;(state.view==="room"?drawRoom:drawClose)();el("busy").hidden=true},10));
+  summary();save();
+}
+
+// ---------- UI builders ----------
+function radio(container,name,items,current,onPick,cls){
+  container.innerHTML="";
+  items.forEach(it=>{
+    const id=name+"-"+it.value.replace(/[^a-z0-9]+/gi,"-");
+    const d=document.createElement("div");d.className="opt"+(cls?" "+cls:"");
+    d.innerHTML=`<input type="radio" name="${name}" id="${id}" value="${it.value}"${it.value===current?" checked":""}${it.disabled?" disabled":""}><label for="${id}">${it.html}</label>`;
+    d.querySelector("input").addEventListener("change",()=>onPick(it.value));
+    container.appendChild(d);
+  });
+}
+const thumbCache={};
+function blendThumb(b){
+  if(thumbCache[b.id])return thumbCache[b.id];
+  const mix=b.custom?state.mix.map(h=>[h,1]):b.mix;if(!mix.length)return "";
+  const t=flakeTile(120,{mix,bg:dominant(mix),cover:"full",chip:9,glitter:"none",seed:b.id});
+  const u=t.toDataURL();if(!b.custom)thumbCache[b.id]=u;return u;
+}
+function buildFinish(){radio(el("finish"),"finish",[{value:"flake",html:"<b>Flake</b><span>Coloured chips in a tough, textured coating</span>"},{value:"metallic",html:"<b>Metallic epoxy</b><span>Hand-worked swirls that look like polished stone</span>"}],state.finish,v=>{state.finish=v;syncFinish();render()})}
+function buildBlends(){
+  const host=el("blends");host.innerHTML="";
+  const groups=[...new Set(B.map(b=>b.group))];
+  groups.forEach(gname=>{
+    const h=document.createElement("p");h.className="group-name";h.textContent=gname;host.appendChild(h);
+    const grid=document.createElement("div");grid.className="swatches";host.appendChild(grid);
+    radio(grid,"blend",B.filter(b=>b.group===gname).map(b=>({value:b.id,html:`<span class="chip" ${b.custom?'data-mix-thumb':''} style="background-image:url(${blendThumb(b)})"></span>${b.name}${b.three?'<span class="tag">3 sizes</span>':''}${b.unsure?'<span class="tag">See sample</span>':''}`})),state.blend,v=>{state.blend=v;syncBlend();render()},"sw");
+  });
+}
+function buildMix(){
+  const host=el("mix-colours");host.innerHTML="";
+  SOLIDS.forEach(([n,h])=>{
+    const id="mix-"+n.replace(/\s+/g,"-");const d=document.createElement("div");d.className="opt sw";
+    d.innerHTML=`<input type="checkbox" id="${id}"${state.mix.includes(h)?" checked":""}><label for="${id}"><span class="chip" style="background:${h}"></span>${n}</label>`;
+    d.querySelector("input").addEventListener("change",e=>{
+      if(e.target.checked){if(state.mix.length>=3){e.target.checked=false;return}state.mix.push(h);state.mixNames.push(n)}
+      else{const i=state.mix.indexOf(h);state.mix.splice(i,1);state.mixNames.splice(i,1)}
+      mixPills();const t=document.querySelector("[data-mix-thumb]");if(t)t.style.backgroundImage=`url(${blendThumb(blendById("mix"))})`;render();
+    });
+    host.appendChild(d);
+  });
+  mixPills();
+}
+function mixPills(){el("mix-chosen").innerHTML=state.mixNames.length?state.mixNames.map(n=>`<span class="mix-pill">${n}</span>`).join(""):'<span class="dz-note">Pick at least one colour.</span>'}
+function buildSizes(){const b=blendById(state.blend);const ok=v=>v==="1/4"||!!b.three;if(!ok(state.size))state.size="1/4";
+  radio(el("sizes"),"size",SIZES.map(([v,l,s])=>({value:v,disabled:!ok(v),html:`<b>${l}</b><span>${s}</span>`})),state.size,v=>{state.size=v;render()});
+  el("size-hint").textContent=b.three?"Smaller chips give a finer, more even look.":`${b.name} comes in 1/4″ chips. Pick a “3 sizes” blend for finer chips.`;}
+function buildCover(){radio(el("coverage"),"cover",COVER.map(([v,l,s])=>({value:v,html:`<b>${l}</b><span>${s}</span>`})),state.cover,v=>{state.cover=v;syncBase();render()})}
+function buildBases(){radio(el("bases"),"base",BASES.map(([n,h])=>({value:n,html:`<span class="chip" style="background:${h}"></span>${n}`})),state.base,v=>{state.base=v;render()},"sw")}
+function buildGlitter(){radio(el("glitter"),"glitter",GLIT.map(([v,l])=>({value:v,html:`<b>${l}</b>`})),state.glitter,v=>{state.glitter=v;render()})}
+function metGrid(host,name,list,current,onPick){
+  host.innerHTML="";const grid=document.createElement("div");grid.className="swatches";host.appendChild(grid);
+  radio(grid,name,list.map(([n,h])=>({value:n,html:`<span class="chip" style="background:${h?`radial-gradient(ellipse at 28% 22%, ${shade(h,.38)} 0%, ${h} 50%, ${shade(h,-.32)} 100%)`:"repeating-linear-gradient(45deg,transparent 0 6px,rgba(127,127,127,.25) 6px 8px)"}"></span>${n}`})),current,onPick,"sw");
+}
+function buildMet(){
+  metGrid(el("met-base"),"metbase",MET,state.metBase,v=>{state.metBase=v;render()});
+  metGrid(el("met-accent"),"metacc",[["None",null],...MET],state.metAccent,v=>{state.metAccent=v;render()});
+  radio(el("movement"),"move",MOVE.map(([v,l,s])=>({value:v,html:`<b>${l}</b><span>${s}</span>`})),state.move,v=>{state.move=v;render()});
+}
+function syncBase(){const full=state.cover==="full";el("base-hint").textContent=full?"With full coverage the base is hidden, so this choice won’t show. Pick Heavy or Partial to see it.":"Shows between the chips.";el("base-fs").style.opacity=full?.6:1}
+function syncBlend(){el("mix-ui").hidden=!blendById(state.blend).custom;buildSizes()}
+function syncFinish(){const f=state.finish==="flake";el("flake-ui").hidden=!f;el("met-ui").hidden=f;steps()}
+function steps(){
+  const S=state.finish==="flake"?[
+    ["Grind and repair","We diamond-grind the concrete and fill cracks so the coating can bond."],
+    ["Base coat and flake","Your base colour goes down, and the flake is broadcast into it while it’s wet."],
+    ["Scrape and clean","Loose chips are scraped and vacuumed off for an even surface."],
+    ["Clear topcoat","A clear protective coat seals the flake in."]
+  ]:[
+    ["Grind and repair","We diamond-grind the concrete and fill cracks so the coating can bond."],
+    ["Primer and base","A primer and dark base coat set the depth for the metallic."],
+    ["Metallic coat","Your colours are poured and worked by hand into the pattern."],
+    ["Clear topcoat","A clear protective coat locks in the look."]
+  ];
+  el("steps").innerHTML=S.map(([a,b])=>`<li><b>${a}</b><span>${b}</span></li>`).join("");
+}
+function summary(){
+  let rows;
+  if(state.finish==="flake"){const b=blendById(state.blend);
+    rows=[["Finish","Flake"],["Blend",b.custom?`Custom mix: ${state.mixNames.join(", ")||"none yet"}`:b.name],["Chip size",SIZES.find(s=>s[0]===state.size)[1]],["Coverage",COVER.find(c=>c[0]===state.cover)[1]],["Base colour",state.cover==="full"?`${state.base} (hidden)`:state.base],["Sparkle",GLIT.find(g=>g[0]===state.glitter)[1]]];
+  }else rows=[["Finish","Metallic epoxy"],["Main colour",state.metBase],["Accent",state.metAccent],["Movement",MOVE.find(m=>m[0]===state.move)[1]]];
+  el("spec").innerHTML=rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join("");
+  el("quote-text").value="Hi Ryder, I’d like a quote for this floor:\n"+rows.map(([a,b])=>`${a}: ${b}`).join("\n")+"\nSize of the area: \nLocation: ";
+}
+el("copy").addEventListener("click",()=>{
+  const t=el("quote-text");
+  navigator.clipboard.writeText(t.value).then(()=>{el("copied").textContent="Copied. Paste it into a text to 587-448-8892, and add your floor size."}).catch(()=>{t.hidden=false;t.focus();t.select();el("copied").textContent="Select and copy the text below."});
+});
+function setView(v){state.view=v;el("v-room").setAttribute("aria-pressed",v==="room");el("v-close").setAttribute("aria-pressed",v==="close");render()}
+el("v-room").addEventListener("click",()=>setView("room"));
+el("v-close").addEventListener("click",()=>setView("close"));
+
+// ---------- start ----------
+if(!B.some(b=>b.id===state.blend))state.blend="domino";
+if(!state.mix)state.mix=[];if(!state.mixNames)state.mixNames=[];
+buildFinish();buildBlends();buildMix();buildCover();buildBases();buildGlitter();buildMet();
+syncBlend();syncBase();syncFinish();setView(state.view==="close"?"close":"room");
+})();
+</script>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div><img class="footer-badge" src="img/logo-badge.png" alt="Black Rock Surface Co badge"></div>
+    <div>
+      <h4>Floor systems</h4>
+      <a href="flake.html">Flake epoxy</a><a href="metallic.html">Metallic epoxy</a><a href="quartz.html">Quartz broadcast</a><a href="designer.html">Floor designer</a>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <a href="about.html">About</a><a href="gallery.html">Gallery</a><a href="faq.html">FAQ</a><a href="contact.html">Free quote</a>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <a href="tel:+14038662915">403-866-2915</a><a href="mailto:blackrocksurfaces@gmail.com">blackrocksurfaces@gmail.com</a><a class="ig-link" href="https://www.instagram.com/blackrocksurfaces/" target="_blank" rel="noopener"><svg class="ig" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>@blackrocksurfaces</a><span>Calgary &amp; surrounding area</span>
+    </div>
+  </div>
+  <div class="wrap legal">&copy; <span id="yr"></span> BlackRock Surface Co. Epoxy &middot; Flooring &middot; Surfaces</div>
+</footer>
+<a class="call-fab" href="tel:+14038662915">Call 403-866-2915</a>
+<script src="site.js?v=b2a42007"></script>
+</body>
+</html>
