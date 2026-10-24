@@ -178,3 +178,8 @@ p{margin:0 0 1em}
   .dot{width:10px;height:10px}
   .dot[aria-current="true"]{width:28px}
 }
+/* year-round banner */
+.announce{background:linear-gradient(180deg,#e9ebee,#c3c7cd);color:#0b0b0c;font-family:var(--head);font-weight:600;letter-spacing:.04em;font-size:.95rem}
+.announce .wrap{display:flex;align-items:center;justify-content:center;gap:10px;padding-top:9px;padding-bottom:9px;text-align:center}
+.announce svg{flex:none}
+@media (max-width:640px){.announce{font-size:.78rem;letter-spacing:.01em}.announce .wrap{gap:7px}}
