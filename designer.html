@@ -108,8 +108,8 @@
           <button type="button" class="btn" id="copy">Copy my choices</button>
           <span class="dz-note" id="copied" role="status"></span>
         </div>
-        <p class="dz-note">Text or call Ryder at</p>
-        <p class="phone" id="phone"><a href="sms:+15874488892">587-448-8892</a></p>
+        <p class="dz-note">Text or call us at</p>
+        <p class="phone" id="phone"><a href="sms:+14038662915">403-866-2915</a></p>
         <p class="dz-note">Or <a href="contact.html">send a quote request</a> and paste your choices into the details box.</p>
         <p class="dz-note">Colours on screen are approximate. We’ll bring a physical sample before anything goes down, and confirm availability with your quote.</p>
         <textarea id="quote-text" rows="4" style="width:100%;font:13px var(--body);border:1px solid #33353b;border-radius:6px;padding:8px;background:var(--bg2);color:var(--text)" aria-label="Text to send with your quote request" hidden></textarea>
@@ -432,11 +432,11 @@ function summary(){
     rows=[["Finish","Flake"],["Blend",b.custom?`Custom mix: ${state.mixNames.join(", ")||"none yet"}`:b.name],["Chip size",SIZES.find(s=>s[0]===state.size)[1]],["Coverage",COVER.find(c=>c[0]===state.cover)[1]],["Base colour",state.cover==="full"?`${state.base} (hidden)`:state.base],["Sparkle",GLIT.find(g=>g[0]===state.glitter)[1]]];
   }else rows=[["Finish","Metallic epoxy"],["Main colour",state.metBase],["Accent",state.metAccent],["Movement",MOVE.find(m=>m[0]===state.move)[1]]];
   el("spec").innerHTML=rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join("");
-  el("quote-text").value="Hi Ryder, I’d like a quote for this floor:\n"+rows.map(([a,b])=>`${a}: ${b}`).join("\n")+"\nSize of the area: \nLocation: ";
+  el("quote-text").value="Hi, I’d like a quote for this floor:\n"+rows.map(([a,b])=>`${a}: ${b}`).join("\n")+"\nSize of the area: \nLocation: ";
 }
 el("copy").addEventListener("click",()=>{
   const t=el("quote-text");
-  navigator.clipboard.writeText(t.value).then(()=>{el("copied").textContent="Copied. Paste it into a text to 587-448-8892, and add your floor size."}).catch(()=>{t.hidden=false;t.focus();t.select();el("copied").textContent="Select and copy the text below."});
+  navigator.clipboard.writeText(t.value).then(()=>{el("copied").textContent="Copied. Paste it into a text to 403-866-2915, and add your floor size."}).catch(()=>{t.hidden=false;t.focus();t.select();el("copied").textContent="Select and copy the text below."});
 });
 function setView(v){state.view=v;el("v-room").setAttribute("aria-pressed",v==="room");el("v-close").setAttribute("aria-pressed",v==="close");render()}
 el("v-room").addEventListener("click",()=>setView("room"));
