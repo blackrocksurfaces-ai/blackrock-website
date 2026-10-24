@@ -53,3 +53,47 @@
     });
   });
 })();
+
+// Reviews carousel
+(function () {
+  var root = document.querySelector('.carousel');
+  if (!root) return;
+  var track = root.querySelector('.track');
+  var slides = track.querySelectorAll('.slide');
+  var dots = document.querySelectorAll('#reviews .dot');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var current = 0, timer = null;
+
+  function go(i) {
+    current = (i + slides.length) % slides.length;
+    track.scrollTo({ left: slides[current].offsetLeft - track.offsetLeft, behavior: reduce ? 'auto' : 'smooth' });
+    mark();
+  }
+  function mark() {
+    dots.forEach(function (d, j) { d.setAttribute('aria-current', j === current ? 'true' : 'false'); });
+  }
+  root.querySelector('.prev').addEventListener('click', function () { go(current - 1); restart(); });
+  root.querySelector('.next').addEventListener('click', function () { go(current + 1); restart(); });
+  dots.forEach(function (d, j) { d.addEventListener('click', function () { go(j); restart(); }); });
+  track.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(current + 1); restart(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(current - 1); restart(); }
+  });
+  var t;
+  track.addEventListener('scroll', function () {
+    clearTimeout(t);
+    t = setTimeout(function () {
+      var i = Math.round(track.scrollLeft / track.clientWidth);
+      if (i !== current) { current = i; mark(); }
+    }, 80);
+  });
+  function start() { if (!reduce && !timer) timer = setInterval(function () { go(current + 1); }, 7000); }
+  function stop() { clearInterval(timer); timer = null; }
+  function restart() { stop(); start(); }
+  root.addEventListener('mouseenter', stop);
+  root.addEventListener('mouseleave', start);
+  root.addEventListener('focusin', stop);
+  root.addEventListener('focusout', start);
+  mark();
+  start();
+})();
