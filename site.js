@@ -12,6 +12,20 @@
     });
   }
 
+  // Floors menu: keep aria-expanded in step with hover/focus, close on Escape.
+  var group = document.querySelector('.nav-group');
+  var drop = group && group.querySelector('.nav-drop');
+  if (drop) {
+    var set = function (v) { drop.setAttribute('aria-expanded', v ? 'true' : 'false'); };
+    group.addEventListener('mouseenter', function () { set(true); });
+    group.addEventListener('mouseleave', function () { set(group.contains(document.activeElement)); });
+    group.addEventListener('focusin', function () { set(true); });
+    group.addEventListener('focusout', function (e) { if (!group.contains(e.relatedTarget)) set(false); });
+    group.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && document.activeElement) { document.activeElement.blur(); set(false); }
+    });
+  }
+
   // Quote form: sends to FormSubmit, which emails the request to you.
   var form = document.getElementById('quote');
   if (!form) return;
