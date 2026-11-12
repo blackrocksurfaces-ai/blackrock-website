@@ -5,7 +5,7 @@
   --head:"Oxanium",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;scroll-padding-top:86px}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--body);-webkit-font-smoothing:antialiased}
 img{max-width:100%;display:block}
 a{color:var(--steel)}
@@ -269,3 +269,30 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
   .facts li:nth-child(odd){padding-left:0}
   .facts li:nth-child(even){border-left:1px solid var(--line)}
 }
+
+/* one-page home: everything in a single scroll */
+.floor-rows{margin-top:10px}
+.floor-row{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center;padding:52px 0;border-top:1px solid var(--line)}
+.floor-row:first-child{border-top:0;padding-top:34px}
+.floor-row:last-child{padding-bottom:0}
+.floor-row.flip .floor-media{order:2}
+.floor-row h3{font-size:clamp(1.5rem,2.4vw,1.9rem)}
+.floor-lead{color:var(--muted);font-size:1.05rem;max-width:56ch}
+.checks.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;margin-top:6px}
+.link-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.gallery.three{grid-template-columns:repeat(3,1fr)}
+.faq-split{display:grid;grid-template-columns:1fr 1.7fr;gap:56px;align-items:start}
+.faq-split .faq{max-width:none}
+.faq-split .faq details:first-child{padding-top:0}
+#about .badge-big{width:min(300px,100%)}
+.site-header .scroll-progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#7d8189,#f3f4f6);pointer-events:none}
+html.reveal-on [data-reveal]{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
+html.reveal-on [data-reveal].in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){html.reveal-on [data-reveal]{opacity:1;transform:none;transition:none}}
+@media (max-width:960px){.gallery.three{grid-template-columns:1fr 1fr}}
+@media (max-width:860px){
+  .floor-row{grid-template-columns:1fr;gap:26px;padding:40px 0}
+  .floor-row.flip .floor-media{order:0}
+  .faq-split{grid-template-columns:1fr;gap:20px}
+}
+@media (max-width:640px){.gallery.three{grid-template-columns:1fr}.checks.cols{grid-template-columns:1fr}}

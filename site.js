@@ -111,3 +111,32 @@
   mark();
   start();
 })();
+
+// Home page: progress line under the header, and sections ease in as they scroll into view.
+(function () {
+  if (!document.body.classList.contains('home')) return;
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var bar = document.createElement('div');
+    bar.className = 'scroll-progress';
+    header.appendChild(bar);
+    var ticking = false;
+    var update = function () {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, window.scrollY / max) : 0) + ')';
+      ticking = false;
+    };
+    window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  }
+  var items = document.querySelectorAll('[data-reveal]');
+  if (!('IntersectionObserver' in window) || !items.length) return;
+  document.documentElement.classList.add('reveal-on');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  items.forEach(function (el) { io.observe(el); });
+  // never leave anything hidden if the observer is slow to fire
+  setTimeout(function () { items.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top < window.innerHeight) el.classList.add('in'); }); }, 1200);
+})();

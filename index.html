@@ -13,14 +13,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=530c2355">
+<link rel="stylesheet" href="styles.css?v=409603c9">
 </head>
-<body>
+<body class="home">
 <header class="site-header">
   <div class="wrap header-row">
     <a class="brand" href="index.html" aria-label="BlackRock Surface Co. home"><img src="img/logo-header.png" alt="Black Rock Surface Co"></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="nav">Menu</button>
-    <nav id="nav" class="nav"><div class="nav-group"><button class="nav-drop" type="button" aria-expanded="false" aria-controls="floors-menu">Floors</button><div class="nav-menu" id="floors-menu"><a href="flake.html">Flake epoxy</a><a href="metallic.html">Metallic epoxy</a><a href="quartz.html">Quartz broadcast</a></div></div><a href="designer.html">Design your floor</a><a href="gallery.html">Gallery</a><a href="about.html">About</a><a class="nav-phone" href="tel:+14038662915">403-866-2915</a><a class="btn btn-sm" href="contact.html">Free Quote</a></nav>
+    <nav id="nav" class="nav"><div class="nav-group"><button class="nav-drop" type="button" aria-expanded="false" aria-controls="floors-menu">Floors</button><div class="nav-menu" id="floors-menu"><a href="flake.html">Flake epoxy</a><a href="metallic.html">Metallic epoxy</a><a href="quartz.html">Quartz broadcast</a></div></div><a href="designer.html">Design your floor</a><a href="gallery.html">Gallery</a><a href="about.html">About</a><a class="nav-phone" href="tel:+14038662915">403-866-2915</a><a class="btn btn-sm" href="#get-quote">Free Quote</a></nav>
   </div>
 </header>
 <div class="announce"><div class="wrap"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17l17.4-10M9.5 3.5L12 5.5l2.5-2M9.5 20.5l2.5-2 2.5 2M3.5 10.5l3-.5-1-3M20.5 13.5l-3 .5 1 3M3.5 13.5l3 .5-1 3M20.5 10.5l-3-.5 1-3"/></svg>Installing all year round, winter included</div></div>
@@ -32,7 +32,7 @@
     <h1>Seamless epoxy floors built for Calgary garages, homes and shops.</h1>
     <p class="lead">Flake, metallic and quartz floor systems. Diamond-ground prep, commercial-grade coatings, and a finish that shrugs off salt, oil and winter slush.</p>
     <div class="hero-actions">
-      <a class="btn" href="contact.html">Get a free quote</a>
+      <a class="btn" href="#get-quote">Get a free quote</a>
       <a class="btn btn-ghost" href="tel:+14038662915">403-866-2915</a>
     </div>
   </div>
@@ -49,30 +49,56 @@
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="floors">
   <div class="wrap">
     <p class="eyebrow">Floor systems</p>
     <h2>Three systems. One standard of work.</h2>
-    <div class="cards">
-      <a class="card" href="flake.html">
-        <img src="img/floors/flake-grey.jpg" alt="Two-car garage with a light grey, white and black flake epoxy floor" loading="lazy">
-        <div class="card-body"><h3>Flake epoxy</h3><p>The garage and basement workhorse. Textured, hides dirt, easy to clean.</p><span class="more">Learn more</span></div>
-      </a>
-      <a class="card" href="metallic.html">
-        <img src="img/floors/metallic-charcoal.jpg" alt="Three-car garage with a charcoal and silver metallic epoxy floor" loading="lazy">
-        <div class="card-body"><h3>Metallic epoxy</h3><p>A one-of-a-kind, marble-like finish with real depth for living spaces and showrooms.</p><span class="more">Learn more</span></div>
-      </a>
-      <a class="card" href="quartz.html">
-        <img src="img/floors/quartz-grey.jpg" alt="Auto repair bay with a grey quartz broadcast floor" loading="lazy">
-        <div class="card-body"><h3>Quartz broadcast</h3><p>Slip-resistant and built for heavy traffic in shops, kitchens and commercial spaces.</p><span class="more">Learn more</span></div>
-      </a>
+    <div class="floor-rows">
+      <article class="floor-row" id="flake" data-reveal>
+        <img class="rounded floor-media" src="img/floors/flake-grey.jpg" alt="Two-car garage with a light grey, white and black flake epoxy floor" loading="lazy">
+        <div>
+          <h3>Flake epoxy</h3>
+          <p class="floor-lead">Decorative vinyl flakes broadcast into an epoxy base, then locked in with a clear topcoat. It's the go-to system for garages because it handles Calgary winters: salt, slush, studded tires and dripping trucks.</p>
+          <ul class="checks cols"><li>Residential garages</li><li>Basements and utility rooms</li><li>Workshops and storage areas</li><li>Mudrooms and laundry rooms</li></ul>
+          <div class="link-row"><a class="btn btn-ghost" href="flake.html">More about flake floors</a><a class="btn btn-ghost" href="designer.html">Try it in the floor designer</a></div>
+        </div>
+      </article>
+      <article class="floor-row flip" id="metallic" data-reveal>
+        <img class="rounded floor-media" src="img/floors/metallic-charcoal.jpg" alt="Three-car garage with a charcoal and silver metallic epoxy floor" loading="lazy">
+        <div>
+          <h3>Metallic epoxy</h3>
+          <p class="floor-lead">Metallic pigments are worked into the epoxy by hand to create swirls, depth and movement, like marble or flowing water. The result is a mirror-gloss statement floor that's still easy to live with.</p>
+          <ul class="checks cols"><li>Basements and living spaces</li><li>Showrooms and retail</li><li>Home gyms and bars</li><li>Feature garages</li></ul>
+          <div class="link-row"><a class="btn btn-ghost" href="metallic.html">More about metallic floors</a><a class="btn btn-ghost" href="designer.html">Try it in the floor designer</a></div>
+        </div>
+      </article>
+      <article class="floor-row" id="quartz" data-reveal>
+        <img class="rounded floor-media" src="img/floors/quartz-grey.jpg" alt="Auto repair bay with a grey quartz broadcast floor" loading="lazy">
+        <div>
+          <h3>Quartz broadcast</h3>
+          <p class="floor-lead">Coloured quartz aggregate is broadcast into epoxy in layers, creating a dense floor with built-in grip. It's the system for spaces with heavy traffic, frequent washing or safety requirements.</p>
+          <ul class="checks cols"><li>Auto shops and service bays</li><li>Commercial kitchens</li><li>Washrooms and locker rooms</li><li>Warehouses and high-traffic areas</li></ul>
+          <div class="link-row"><a class="btn btn-ghost" href="quartz.html">More about quartz floors</a></div>
+        </div>
+      </article>
     </div>
-    <p class="note">Not sure which look you want? <a href="designer.html">Try the floor designer</a> to preview flake blends and metallic colours on a garage floor.</p>
   </div>
 </section>
 
-<section class="section alt">
-  <div class="wrap split">
+<section class="section alt" id="designer">
+  <div class="wrap split" data-reveal>
+    <div>
+      <p class="eyebrow">Floor designer</p>
+      <h2>See your floor before we pour it.</h2>
+      <p class="lead">Pick a flake blend or a metallic colour, change the chip size and coverage, and watch it appear on a real garage floor. Save the design and send it with your quote request.</p>
+      <div class="link-row"><a class="btn" href="designer.html">Open the floor designer</a></div>
+    </div>
+    <a href="designer.html"><img class="rounded" src="img/designer-preview.jpg" alt="Floor designer preview showing a tan flake blend on a garage floor" loading="lazy"></a>
+  </div>
+</section>
+
+<section class="section" id="why">
+  <div class="wrap split" data-reveal>
     <div>
       <p class="eyebrow">Why epoxy</p>
       <h2>Bare concrete stains, dusts and cracks. A sealed floor doesn't.</h2>
@@ -87,8 +113,8 @@
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap">
+<section class="section alt" id="process">
+  <div class="wrap" data-reveal>
     <p class="eyebrow">Our process</p>
     <h2>The prep is what makes it last.</h2>
     <ol class="steps">
@@ -97,6 +123,22 @@
       <li><span>03</span><h3>Repair</h3><p>Cracks, spalls and pits are filled and levelled before any coating goes down.</p></li>
       <li><span>04</span><h3>Coat and seal</h3><p>Base coat, your chosen system, and a clear protective topcoat.</p></li>
     </ol>
+  </div>
+</section>
+
+<section class="section" id="gallery">
+  <div class="wrap">
+    <p class="eyebrow">Gallery</p>
+    <h2>What each system can look like.</h2>
+    <div class="gallery three mt">
+      <figure data-reveal><img src="img/floors/metallic-white.jpg" alt="Finished basement with a bar and pool table on a white marble-look metallic epoxy floor" loading="lazy"><figcaption>Metallic, pearl white · basement</figcaption></figure>
+      <figure data-reveal><img src="img/floors/flake-charcoal.jpg" alt="Home workshop with a wooden workbench and a dark charcoal flake epoxy floor" loading="lazy"><figcaption>Flake, charcoal · home workshop</figcaption></figure>
+      <figure data-reveal><img src="img/floors/metallic-copper.jpg" alt="Coffee shop with a copper and bronze metallic epoxy floor" loading="lazy"><figcaption>Metallic, copper · coffee shop</figcaption></figure>
+      <figure data-reveal><img src="img/floors/quartz-tan.jpg" alt="Restaurant kitchen with a tan quartz broadcast floor and cove base" loading="lazy"><figcaption>Quartz, tan · commercial kitchen</figcaption></figure>
+      <figure data-reveal><img src="img/floors/metallic-blue.jpg" alt="Garage home gym with a deep blue metallic epoxy floor" loading="lazy"><figcaption>Metallic, deep blue · home gym</figcaption></figure>
+      <figure data-reveal><img src="img/floors/flake-blue.jpg" alt="Basement laundry and mudroom with a blue-grey flake epoxy floor" loading="lazy"><figcaption>Flake, blue-grey · laundry and mudroom</figcaption></figure>
+    </div>
+    <div class="link-row"><a class="btn btn-ghost" href="gallery.html">See the full gallery</a></div>
   </div>
 </section>
 
@@ -141,15 +183,71 @@
   </div>
 </section>
 
-<section class="cta-band">
-  <div class="wrap cta-inner">
-    <div>
-      <h2>Ready for a floor that lasts?</h2>
-      <p>Free on-site measure and quote anywhere in Calgary and area.</p>
+<section class="section" id="about">
+  <div class="wrap split" data-reveal>
+    <div class="prose">
+      <p class="eyebrow">About</p>
+      <h2>Calgary-based. Prep-obsessed.</h2>
+      <p>BlackRock Surface Co. installs epoxy floor systems for homeowners and businesses across Calgary and the surrounding area.</p>
+      <p>Most coating failures come down to one thing: a shortcut on prep. That's why every job starts with diamond grinding and proper crack repair, and why we use commercial-grade coatings rather than the kits sold at big-box stores.</p>
+      <p>You'll deal directly with the people doing the work, from the first measure to the final walkthrough.</p>
     </div>
-    <div class="cta-actions">
-      <a class="btn" href="contact.html">Request a free quote</a>
-      <a class="btn btn-ghost" href="tel:+14038662915">Call 403-866-2915</a>
+    <img class="badge-big" src="img/logo-badge.png" alt="Black Rock Surface Co badge" loading="lazy">
+  </div>
+</section>
+
+<section class="section alt" id="faq">
+  <div class="wrap faq-split" data-reveal>
+    <div>
+      <p class="eyebrow">FAQ</p>
+      <h2>Questions we get a lot</h2>
+    </div>
+    <div class="faq"><details><summary>How long does an install take?</summary><p>Most residential garages take 1 to 2 days, depending on the size, the slab's condition and the system. We'll give you a timeline with your quote.</p></details><details><summary>When can I walk or park on it?</summary><p>Light foot traffic is usually fine within about a day. Vehicles need longer for the coating to fully cure. We'll give you exact times for your system and the temperature on the day.</p></details><details><summary>Can you coat a floor in winter?</summary><p>Yes, as long as the space can be kept heated to the temperature the coating needs during install and cure. Attached and heated garages are usually fine.</p></details><details><summary>What about cracks in my concrete?</summary><p>Cracks and spalls are repaired before coating. Coatings bridge hairline cracks well, but a slab that's still moving can telegraph cracks through over time. We'll flag that at the quote.</p></details><details><summary>Is it slippery?</summary><p>A plain gloss coat can be slick when wet. Flake and quartz systems add texture, and we can add anti-slip additive to the topcoat.</p></details><details><summary>How do I clean it?</summary><p>Sweep or dust-mop regularly, and mop with a mild cleaner. Avoid soap-heavy or acidic cleaners that leave a film.</p></details><details><summary>How much does it cost?</summary><p>It depends on square footage, slab condition and system. Every quote is free and done on-site so the price is accurate, not a guess.</p></details></div>
+  </div>
+</section>
+
+<section class="section" id="get-quote">
+  <div class="wrap" data-reveal>
+    <p class="eyebrow">Free quote</p>
+    <h2>Tell us about your floor</h2>
+    <p class="lead">Send the details and we'll get back to you to book a free on-site measure. Prefer to talk? Call or text <a href="tel:+14038662915">403-866-2915</a>.</p>
+    <div class="split contact mt">
+    <form id="quote" class="form" action="https://formsubmit.co/ajax/7c59a84eb715c0507be6e21f9f8af53b" method="POST" novalidate>
+      <input type="hidden" name="_subject" value="New quote request - BlackRock Surface Co.">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+      <div class="row2">
+        <label>Name<input name="name" required autocomplete="name"></label>
+        <label>Phone<input name="phone" type="tel" required autocomplete="tel"></label>
+      </div>
+      <label>Email<input name="email" type="email" autocomplete="email"></label>
+      <div class="row2">
+        <label>Area / neighbourhood<input name="area" placeholder="e.g. NW Calgary, Airdrie"></label>
+        <label>Approx. size (sq ft)<input name="size" inputmode="numeric" placeholder="e.g. 450"></label>
+      </div>
+      <label>Floor system
+        <select name="system">
+          <option>Not sure yet</option><option>Flake epoxy</option><option>Metallic epoxy</option><option>Quartz broadcast</option>
+        </select>
+      </label>
+      <label>Space
+        <select name="space">
+          <option>Garage</option><option>Basement</option><option>Commercial / shop</option><option>Other</option>
+        </select>
+      </label>
+      <label>Anything else?<textarea name="message" rows="4" placeholder="Cracks, timeline, colour ideas..."></textarea></label>
+      <button class="btn" type="submit">Send quote request</button>
+      <p class="form-note" id="formNote">We'll get back to you to book your free on-site quote.</p>
+    </form>
+    <aside class="contact-card">
+      <img src="img/logo-monogram.jpg" alt="BR monogram" class="mono">
+      <h3>Contact</h3>
+      <p><a href="tel:+14038662915">403-866-2915</a></p>
+      <p><a href="mailto:blackrocksurfaces@gmail.com">blackrocksurfaces@gmail.com</a></p>
+      <p><a class="ig-link" href="https://www.instagram.com/blackrocksurfaces/" target="_blank" rel="noopener"><svg class="ig" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>@blackrocksurfaces</a></p>
+      <p>Serving Calgary &amp; surrounding area</p>
+    </aside>
     </div>
   </div>
 </section>
@@ -174,6 +272,6 @@
   <div class="wrap legal"><div>&copy; <span id="yr"></span> BlackRock Surface Co. All rights reserved.</div><div>Calgary, Alberta</div></div>
 </footer>
 <a class="call-fab" href="tel:+14038662915">Call 403-866-2915</a>
-<script src="site.js?v=ee2bb52c"></script>
+<script src="site.js?v=ac1b5864"></script>
 </body>
 </html>
