@@ -1,7 +1,7 @@
 :root{
   --bg:#0a0a0b; --bg2:#121214; --bg3:#18181b; --line:#2a2a2f;
   --text:#e9eaec; --muted:#a3a6ad; --steel:#cfd2d7; --steel2:#8d9199;
-  --radius:10px; --wrap:1160px;
+  --radius:10px; --wrap:1240px;
   --head:"Oxanium",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
@@ -374,3 +374,14 @@ body{padding-bottom:82px}
 @media (max-width:360px){.header-call{font-size:.9rem}}
 
 .page-hero .btn{margin:8px 8px 0 0}
+
+/* larger photos */
+.card img,.rounded,.gallery img{aspect-ratio:3/2}
+.floor-row{grid-template-columns:1.2fr 1fr;gap:48px}
+.floor-row.flip{grid-template-columns:1fr 1.2fr}
+.split:has(> img.rounded),.split:has(> a > img.rounded),.split:has(> div > img.rounded){grid-template-columns:1fr 1.1fr;gap:48px}
+.gallery.three{gap:18px}
+@media (max-width:860px){
+  .floor-row,.floor-row.flip{grid-template-columns:1fr}
+  .split:has(> img.rounded),.split:has(> a > img.rounded),.split:has(> div > img.rounded){grid-template-columns:1fr}
+}
