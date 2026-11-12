@@ -20,7 +20,7 @@
 .dz-intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px 40px;margin-bottom:28px}
 .dz-intro h1{margin:0}
 .dz-intro .lead{margin:0;max-width:52ch}
-.dz .grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+.dz .grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:24px;align-items:start}
 @media (max-width:860px){.dz .grid{grid-template-columns:minmax(0,1fr)}}
 .dz .stage{position:sticky;top:90px;display:flex;flex-direction:column;gap:14px;min-width:0}
 @media (max-width:860px){.dz .stage{position:static}}
@@ -258,7 +258,7 @@ function flakeTile(size,{mix,bg,cover,chip,glitter,seed,depth}){
   const pick=()=>{let v=r()*total;for(const [h,w] of mix){if((v-=w)<0)return h}return mix[0][0]};
   const area=chip*chip*0.55;const d={full:2.7,heavy:2.3,partial:1.05}[cover];
   const n=Math.min(180000,Math.round(d*size*size/area));
-  const shadow=depth&&chip>=5,so=Math.max(.6,chip*.07);
+  const shadow=depth&&chip>=5,bevel=depth&&chip>=9,so=Math.max(.6,chip*.07);
   const tones={};const tone=h=>{const k=Math.floor(r()*5),key=h+k;return tones[key]||(tones[key]=shade(h,(k-2)*.035))};
   const pts=new Float32Array(14);
   for(let i=0;i<n;i++){
@@ -269,6 +269,7 @@ function flakeTile(size,{mix,bg,cover,chip,glitter,seed,depth}){
     for(const [ox,oy] of offs){
       if(shadow){x.fillStyle="rgba(0,0,0,.2)";x.beginPath();x.moveTo(pts[0]+ox+so,pts[1]+oy+so*1.3);for(let j=1;j<nv;j++)x.lineTo(pts[j*2]+ox+so,pts[j*2+1]+oy+so*1.3);x.closePath();x.fill()}
       x.fillStyle=col;x.beginPath();x.moveTo(pts[0]+ox,pts[1]+oy);for(let j=1;j<nv;j++)x.lineTo(pts[j*2]+ox,pts[j*2+1]+oy);x.closePath();x.fill();
+      if(bevel){x.lineWidth=1;x.strokeStyle="rgba(255,255,255,.13)";x.stroke()}
     }
   }
   const g=GLIT.find(q=>q[0]===glitter);
@@ -293,33 +294,42 @@ function metal(baseHex,accHex,move,seed){
   function n2(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;const a=V[P[(xi&255)+P[yi&255]]],b=V[P[((xi+1)&255)+P[yi&255]]],c=V[P[(xi&255)+P[(yi+1)&255]]],d=V[P[((xi+1)&255)+P[(yi+1)&255]]];const u=sm(xf),v=sm(yf);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
   // fbm with a fractional octave count, so detail fades out with distance instead of aliasing
   const fbm=(x,y,n)=>{let s=0,w=0,a=.5,f=1;for(let o=0;o<n;o++){const k=n-o<1?n-o:1;s+=a*k*n2(x*f,y*f);w+=a*k;f*=2.03;a*=.5}return s/w};
-  const warp={calm:1.6,flow:3.6,bold:6}[move],con={calm:.7,flow:1,bold:1.35}[move],vk={calm:9,flow:12,bold:10}[move];
+  const warp={calm:1.3,flow:2.6,bold:4.4}[move],con={calm:.7,flow:1,bold:1.35}[move],vk={calm:9,flow:12,bold:10}[move];
   const base=rgb(baseHex),acc=accHex?rgb(accHex):null;
   const lum=(base[0]*.3+base[1]*.59+base[2]*.11)/255;
   const light=base.map(c=>c+(255-c)*(lum>.8?.15:.42)),dark=base.map(c=>c*(lum<.15?.55:.62));
-  const out=[0,0];
+  const out=[0,0,0];const ss=(a,b,x)=>{x=(x-a)/(b-a);x=x<0?0:x>1?1:x;return x*x*(3-2*x)};
   return{
     at(x,y,oct){
       const qx=fbm(x,y,3),qy=fbm(x+5.2,y+1.3,3);
       const rx=fbm(x+warp*qx+1.7,y+warp*qy+9.2,3),ry=fbm(x+warp*qx+8.3,y+warp*qy+2.8,3);
-      const v=.5+(fbm(x+warp*rx,y+warp*ry,oct)-.5)*1.8*con;
-      out[0]=v<0?0:v>1?1:v;out[1]=acc?Math.pow(Math.max(0,1-Math.abs(rx-.55)*vk),1.6)*.92:0;return out;
+      const v=.5+(fbm(x+warp*rx,y+warp*ry,oct)-.5)*1.3*con;
+      out[0]=v<0?0:v>1?1:v;
+      const m=Math.max(0,1-Math.abs(rx-.56)*vk*.32);out[1]=acc?m*m*.55:0;                    // accent clouds
+      const l=Math.max(0,1-Math.abs(ry-.5)*34);out[2]=l*l*ss(.56,.72,qx);                     // a few thin veins         // fine pearl lacing
+      return out;
     },
-    // F = swirl value, A = vein strength, both w*h; returns RGBA bytes
-    paint(F,A,w,h,ek){
+    // F = swirl value, A = accent strength, Lc = lacing, all w*h; returns RGBA bytes
+    paint(F,A,Lc,w,h,ek){
       const D=new Uint8ClampedArray(w*h*4);
       for(let j=0;j<h;j++)for(let i=0;i<w;i++){
-        const p=j*w+i,v=F[p];let c0,c1,c2;
-        if(v<.45){const t=v/.45;c0=dark[0]+(base[0]-dark[0])*t;c1=dark[1]+(base[1]-dark[1])*t;c2=dark[2]+(base[2]-dark[2])*t}
-        else if(v<.62){const t=(v-.45)/.17;c0=base[0]+(light[0]-base[0])*t;c1=base[1]+(light[1]-base[1])*t;c2=base[2]+(light[2]-base[2])*t}
-        else{const t=Math.min(1,(v-.62)/.38)*.6;c0=light[0]+(base[0]-light[0])*t;c1=light[1]+(base[1]-light[1])*t;c2=light[2]+(base[2]-light[2])*t}
+        const p=j*w+i,v=F[p],t1=ss(.12,.6,v),t2=ss(.5,.95,v)*.5;
+        let c0=dark[0]+(base[0]-dark[0])*t1,c1=dark[1]+(base[1]-dark[1])*t1,c2=dark[2]+(base[2]-dark[2])*t1;
+        c0+=(light[0]-c0)*t2;c1+=(light[1]-c1)*t2;c2+=(light[2]-c2)*t2;
         if(acc){const m=A[p];c0+=(acc[0]-c0)*m;c1+=(acc[1]-c1)*m;c2+=(acc[2]-c2)*m}
-        let e=((F[j*w+(i?i-1:0)]-F[j*w+(i<w-1?i+1:i)])+(F[(j?j-1:0)*w+i]-F[(j<h-1?j+1:j)*w+i]))*ek;e=e>20?20:e<-20?-20:e;
+        const lc=Lc[p]*.55,hi=acc||light;c0+=(hi[0]-c0)*lc;c1+=(hi[1]-c1)*lc;c2+=(hi[2]-c2)*lc;
+        let e=((F[j*w+(i?i-1:0)]-F[j*w+(i<w-1?i+1:i)])+(F[(j?j-1:0)*w+i]-F[(j<h-1?j+1:j)*w+i]))*ek;e=e>4?4:e<-4?-4:e;
         const o=p*4;D[o]=c0+e;D[o+1]=c1+e;D[o+2]=c2+e;D[o+3]=255;
       }
       return D;
     }
   };
+}
+// a w*h patch of metallic centred on (cx,cy) noise units, `span` units wide
+function metalPatch(w,h,b,a,move,seed,cx,cy,span,oct,ek){
+  const m=metal(b,a,move,seed),F=new Float32Array(w*h),A=new Float32Array(w*h),Lc=new Float32Array(w*h),sc=span/w;
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const q=m.at(cx+(i-w/2)*sc,cy+(j-h/2)*sc,oct),p=j*w+i;F[p]=q[0];A[p]=q[1];Lc[p]=q[2]}
+  const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").putImageData(new ImageData(m.paint(F,A,Lc,w,h,ek),w,h),0,0);return cv;
 }
 const cache={};
 function cached(slot,key,make){const c=cache[slot];if(c&&c.key===key)return c.val;const val=make();cache[slot]={key,val};return val}
@@ -332,7 +342,7 @@ const metKey=()=>state.metBase+"|"+state.metAccent+"|"+state.move;
 // on top, so the new floor sits in the room the way the photographed one did.
 const scene=el("scene"),sx=scene.getContext("2d",{willReadFrequently:true});const W=1200,H=750;
 const CAM={yh:60,cx:600,f:700,h:62};   // horizon row, centre column, focal length (px), camera height (in)
-const PPI=64/3,BIG=2,REF=131;        // tile texels per inch, chip enlargement in this view, photo floor brightness
+const PPI=64/3,BIG=3,REF=131;        // tile texels per inch, chip enlargement in this view, photo floor brightness
 const room={ready:false,failed:false};
 (function(){
   const srcs=["img/designer/garage-room.jpg","img/designer/garage-light.jpg","img/designer/garage-mask.png"];let left=srcs.length;
@@ -359,34 +369,38 @@ function drawRoom(){
   const flake=state.finish==="flake";let L,FD,FW,FH,gloss;
   if(flake){
     const o=flakeOpts(.25*BIG*PPI,true);const T={"1/4":1024,"1/8":768,"1/16":512}[state.size];
-    L=cached("pyr",o.seed+o.bg+o.glitter,()=>pyramid(flakeTile(T,o)));gloss=1.15;
+    L=cached("pyr",o.seed+o.bg+o.glitter,()=>pyramid(flakeTile(T,o)));gloss=1;
   }else{
     const [b,a]=metHex();FW=W/2;FH=H/2;
     FD=cached("metRoom",metKey(),()=>{
-      const m=metal(b,a,state.move,metKey()),F=new Float32Array(FW*FH),A=new Float32Array(FW*FH);
+      const m=metal(b,a,state.move,metKey()),F=new Float32Array(FW*FH),A=new Float32Array(FW*FH),Lc=new Float32Array(FW*FH);
       for(let j=Math.max(0,(room.top>>1)-1);j<FH;j++){
         const d=Math.max(8,j*2+1-CAM.yh),ipp=CAM.h/d,Z=CAM.f*ipp,fp=2*CAM.f*CAM.h/(d*d);
         const oct=Math.max(2,Math.min(5,Math.log(UNIT/(2*fp))/Math.log(2.03)+1));
-        for(let i=0;i<FW;i++){const q=m.at((i*2+1-CAM.cx)*ipp/UNIT+40,Z/UNIT,oct);F[j*FW+i]=q[0];A[j*FW+i]=q[1]}
+        for(let i=0;i<FW;i++){const q=m.at((i*2+1-CAM.cx)*ipp/UNIT+40,Z/UNIT,oct);F[j*FW+i]=q[0];A[j*FW+i]=q[1];Lc[j*FW+i]=q[2]}
       }
-      return m.paint(F,A,FW,FH,55);
-    });gloss=1.25;
+      return m.paint(F,A,Lc,FW,FH,22);
+    });gloss=1.2;
   }
   for(let y=room.top;y<H;y++){
     const d=y-CAM.yh,ipp=CAM.h/d,z0=CAM.f*CAM.h/(d-.5),z1=CAM.f*CAM.h/(d+.5);
     const taps=Math.max(1,Math.min(6,Math.round(CAM.f/d)));
     let A,B2,sa,sb,t;
-    if(flake){let l=Math.log2(ipp*PPI);l=l<0?0:l>L.length-1?L.length-1:l;const l0=l|0,l1=Math.min(L.length-1,l0+1);t=l-l0;A=L[l0];B2=L[l1];sa=PPI/(1<<l0);sb=PPI/(1<<l1)}
+    if(flake){let l=Math.log2(ipp*PPI)+.35;l=l<0?0:l>L.length-1?L.length-1:l;const l0=l|0,l1=Math.min(L.length-1,l0+1);t=l-l0;A=L[l0];B2=L[l1];sa=PPI/(1<<l0);sb=PPI/(1<<l1)}
     for(let x=0;x<W;x++){
       const i=y*W+x,m=M[i];if(!m)continue;
       const X=(x-CAM.cx)*ipp;let r=0,g=0,b=0;
       for(let k=0;k<taps;k++){
         const Z=z0+(z1-z0)*(k+.5)/taps;
         if(flake){
-          let u=Math.floor(X*sa)%A.s,v=Math.floor(Z*sa)%A.s;if(u<0)u+=A.s;let p=(v*A.s+u)*4;
-          const r0=A.d[p],g0=A.d[p+1],b0=A.d[p+2];
-          u=Math.floor(X*sb)%B2.s;v=Math.floor(Z*sb)%B2.s;if(u<0)u+=B2.s;p=(v*B2.s+u)*4;
-          r+=r0+(B2.d[p]-r0)*t;g+=g0+(B2.d[p+1]-g0)*t;b+=b0+(B2.d[p+2]-b0)*t;
+          let u=X*sa-.5,v=Z*sa-.5,u0=Math.floor(u),v0=Math.floor(v),fu=u-u0,fv=v-v0,n=A.s,dd=A.d;
+          u0%=n;if(u0<0)u0+=n;v0%=n;let u1=u0+1===n?0:u0+1,v1=v0+1===n?0:v0+1;
+          let p=(v0*n+u0)*4,q=(v0*n+u1)*4,p2=(v1*n+u0)*4,q2=(v1*n+u1)*4,w00=(1-fu)*(1-fv),w10=fu*(1-fv),w01=(1-fu)*fv,w11=fu*fv;
+          const r0=dd[p]*w00+dd[q]*w10+dd[p2]*w01+dd[q2]*w11,g0=dd[p+1]*w00+dd[q+1]*w10+dd[p2+1]*w01+dd[q2+1]*w11,b0=dd[p+2]*w00+dd[q+2]*w10+dd[p2+2]*w01+dd[q2+2]*w11;
+          u=X*sb-.5;v=Z*sb-.5;u0=Math.floor(u);v0=Math.floor(v);fu=u-u0;fv=v-v0;n=B2.s;dd=B2.d;
+          u0%=n;if(u0<0)u0+=n;v0%=n;u1=u0+1===n?0:u0+1;v1=v0+1===n?0:v0+1;
+          p=(v0*n+u0)*4;q=(v0*n+u1)*4;p2=(v1*n+u0)*4;q2=(v1*n+u1)*4;w00=(1-fu)*(1-fv);w10=fu*(1-fv);w01=(1-fu)*fv;w11=fu*fv;
+          r+=r0+(dd[p]*w00+dd[q]*w10+dd[p2]*w01+dd[q2]*w11-r0)*t;g+=g0+(dd[p+1]*w00+dd[q+1]*w10+dd[p2+1]*w01+dd[q2+1]*w11-g0)*t;b+=b0+(dd[p+2]*w00+dd[q+2]*w10+dd[p2+2]*w01+dd[q2+2]*w11-b0)*t;
         }else{
           let u=x/2-.25,v=(y+(k+.5)/taps-.5)/2-.25;u=u<0?0:u>FW-1.001?FW-1.001:u;v=v<0?0:v>FH-1.001?FH-1.001:v;
           const u0=u|0,v0=v|0,fu=u-u0,fv=v-v0,p=(v0*FW+u0)*4,q=p+FW*4;
@@ -394,7 +408,7 @@ function drawRoom(){
           r+=FD[p]*w00+FD[p+4]*w10+FD[q]*w01+FD[q+4]*w11;g+=FD[p+1]*w00+FD[p+5]*w10+FD[q+1]*w01+FD[q+5]*w11;b+=FD[p+2]*w00+FD[p+6]*w10+FD[q+2]*w01+FD[q+6]*w11;
         }
       }
-      const s=S[i],dif=(s<1?s:1)/taps,add=s>1?(s-1)*REF*gloss:0,a=m/255,o=i*4;
+      const s=S[i],hl=s-1,dif=(s<1?s:1)/taps,add=hl>0?(1.5*hl+2.2*hl*hl)*REF*gloss:0,a=m/255,o=i*4;
       D[o]+=(r*dif+add-D[o])*a;D[o+1]+=(g*dif+add-D[o+1])*a;D[o+2]+=(b*dif+add-D[o+2])*a;
     }
   }
@@ -406,16 +420,14 @@ function drawClose(){
     const o=flakeOpts(12.5,true);const tile=cached("close",o.seed+o.bg+o.glitter,()=>flakeTile(1024,o));
     sx.fillStyle=sx.createPattern(tile,"repeat");sx.fillRect(0,0,W,H);label="About 24″ across";
   }else{
-    const [b,a]=metHex();const s=cached("metClose",metKey(),()=>{
-      const w=900,h=562,m=metal(b,a,state.move,metKey()),F=new Float32Array(w*h),A=new Float32Array(w*h),sc=72/UNIT/w;
-      for(let j=0;j<h;j++)for(let i=0;i<w;i++){const q=m.at(40+(i-w/2)*sc,2.2+(j-h/2)*sc,7);F[j*w+i]=q[0];A[j*w+i]=q[1]}
-      const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").putImageData(new ImageData(m.paint(F,A,w,h,700),w,h),0,0);return cv;
-    });
+    const [b,a]=metHex();const s=cached("metClose",metKey(),()=>metalPatch(900,562,b,a,state.move,metKey(),40,2.2,72/UNIT,7,260));
     sx.imageSmoothingQuality="high";sx.drawImage(s,0,0,W,H);label="About 6 ft across";
   }
-  // clear-coat light: a soft window glare, a fall-off toward the far corner, a vignette
+  // clear-coat light: faint surface ripple, a soft window glare, a fall-off toward the far corner, a vignette
+  const peel=cached("peel","",()=>{const c=document.createElement("canvas");c.width=150;c.height=94;const im=new ImageData(150,94),q=rng("peel");for(let i=0;i<150*94;i++){const v=q()*255;im.data[i*4]=im.data[i*4+1]=im.data[i*4+2]=v;im.data[i*4+3]=255}c.getContext("2d").putImageData(im,0,0);return c});
+  sx.save();sx.imageSmoothingEnabled=true;sx.imageSmoothingQuality="high";sx.globalCompositeOperation="overlay";sx.globalAlpha=state.finish==="flake"?.16:.03;sx.drawImage(peel,0,0,W,H);sx.restore();
   sx.save();sx.translate(330,150);sx.rotate(-.32);sx.scale(2.7,1);
-  let g=sx.createRadialGradient(0,0,0,0,0,170);g.addColorStop(0,"rgba(255,255,255,.26)");g.addColorStop(.55,"rgba(255,255,255,.08)");g.addColorStop(1,"rgba(255,255,255,0)");sx.fillStyle=g;sx.fillRect(-200,-200,400,400);sx.restore();
+  let g=sx.createRadialGradient(0,0,0,0,0,170);g.addColorStop(0,"rgba(255,255,255,.42)");g.addColorStop(.5,"rgba(255,255,255,.12)");g.addColorStop(1,"rgba(255,255,255,0)");sx.fillStyle=g;sx.fillRect(-200,-200,400,400);sx.restore();
   g=sx.createLinearGradient(0,0,W,H);g.addColorStop(0,"rgba(255,255,255,.08)");g.addColorStop(.45,"rgba(255,255,255,0)");g.addColorStop(1,"rgba(0,0,0,.16)");sx.fillStyle=g;sx.fillRect(0,0,W,H);
   g=sx.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,W*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.3)");sx.fillStyle=g;sx.fillRect(0,0,W,H);
   sx.font="600 16px Inter, sans-serif";const tw=sx.measureText(label).width;
@@ -446,7 +458,7 @@ const thumbCache={};
 function blendThumb(b){
   if(thumbCache[b.id])return thumbCache[b.id];
   const mix=b.custom?state.mix.map(h=>[h,1]):b.mix;if(!mix.length)return "";
-  const t=flakeTile(120,{mix,bg:dominant(mix),cover:"full",chip:9,glitter:"none",seed:b.id});
+  const t=flakeTile(160,{mix,bg:dominant(mix),cover:"full",chip:11,glitter:"none",seed:b.id,depth:true});
   const u=t.toDataURL();if(!b.custom)thumbCache[b.id]=u;return u;
 }
 function buildFinish(){radio(el("finish"),"finish",[{value:"flake",html:"<b>Flake</b><span>Coloured chips in a tough, textured coating</span>"},{value:"metallic",html:"<b>Metallic epoxy</b><span>Hand-worked swirls that look like polished stone</span>"}],state.finish,v=>{state.finish=v;syncFinish();render()})}
@@ -456,7 +468,7 @@ function buildBlends(){
   groups.forEach(gname=>{
     const h=document.createElement("p");h.className="group-name";h.textContent=gname;host.appendChild(h);
     const grid=document.createElement("div");grid.className="swatches";host.appendChild(grid);
-    radio(grid,"blend",B.filter(b=>b.group===gname).map(b=>({value:b.id,html:`<span class="chip" ${b.custom?'data-mix-thumb':''} style="background-image:url(${blendThumb(b)})"></span>${b.name}${b.three?'<span class="tag">3 sizes</span>':''}${b.unsure?'<span class="tag">See sample</span>':''}`})),state.blend,v=>{state.blend=v;syncBlend();render()},"sw");
+    radio(grid,"blend",B.filter(b=>b.group===gname).map(b=>({value:b.id,html:`<span class="chip" ${b.custom?'data-mix-thumb':''} style="background-image:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,0) 42%),url(${blendThumb(b)})"></span>${b.name}${b.three?'<span class="tag">3 sizes</span>':''}${b.unsure?'<span class="tag">See sample</span>':''}`})),state.blend,v=>{state.blend=v;syncBlend();render()},"sw");
   });
 }
 function buildMix(){
@@ -467,7 +479,7 @@ function buildMix(){
     d.querySelector("input").addEventListener("change",e=>{
       if(e.target.checked){if(state.mix.length>=3){e.target.checked=false;return}state.mix.push(h);state.mixNames.push(n)}
       else{const i=state.mix.indexOf(h);state.mix.splice(i,1);state.mixNames.splice(i,1)}
-      mixPills();const t=document.querySelector("[data-mix-thumb]");if(t)t.style.backgroundImage=`url(${blendThumb(blendById("mix"))})`;render();
+      mixPills();const t=document.querySelector("[data-mix-thumb]");if(t)t.style.backgroundImage=`linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,0) 42%),url(${blendThumb(blendById("mix"))})`;render();
     });
     host.appendChild(d);
   });
@@ -480,9 +492,11 @@ function buildSizes(){const b=blendById(state.blend);const ok=v=>v==="1/4"||!!b.
 function buildCover(){radio(el("coverage"),"cover",COVER.map(([v,l,s])=>({value:v,html:`<b>${l}</b><span>${s}</span>`})),state.cover,v=>{state.cover=v;syncBase();render()})}
 function buildBases(){radio(el("bases"),"base",BASES.map(([n,h])=>({value:n,html:`<span class="chip" style="background:${h}"></span>${n}`})),state.base,v=>{state.base=v;render()},"sw")}
 function buildGlitter(){radio(el("glitter"),"glitter",GLIT.map(([v,l])=>({value:v,html:`<b>${l}</b>`})),state.glitter,v=>{state.glitter=v;render()})}
+const metThumbs={};
+function metThumb(n,h){return metThumbs[n]||(metThumbs[n]=metalPatch(96,64,h,null,"flow",n,40,2.2,1.6,4,40).toDataURL("image/jpeg",.85))}
 function metGrid(host,name,list,current,onPick){
   host.innerHTML="";const grid=document.createElement("div");grid.className="swatches";host.appendChild(grid);
-  radio(grid,name,list.map(([n,h])=>({value:n,html:`<span class="chip" style="background:${h?`radial-gradient(ellipse at 28% 22%, ${shade(h,.38)} 0%, ${h} 50%, ${shade(h,-.32)} 100%)`:"repeating-linear-gradient(45deg,transparent 0 6px,rgba(127,127,127,.25) 6px 8px)"}"></span>${n}`})),current,onPick,"sw");
+  radio(grid,name,list.map(([n,h])=>({value:n,html:`<span class="chip" style="background:${h?`linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,0) 42%),url(${metThumb(n,h)})`:"repeating-linear-gradient(45deg,transparent 0 6px,rgba(127,127,127,.25) 6px 8px)"}"></span>${n}`})),current,onPick,"sw");
 }
 function buildMet(){
   metGrid(el("met-base"),"metbase",MET,state.metBase,v=>{state.metBase=v;render()});
