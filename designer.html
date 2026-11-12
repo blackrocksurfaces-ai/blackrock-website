@@ -111,6 +111,7 @@
         <p class="dz-note">Text or call us at</p>
         <p class="phone" id="phone"><a href="sms:+14038662915">403-866-2915</a></p>
         <p class="dz-note">Or <a href="contact.html">send a quote request</a> and paste your choices into the details box.</p>
+        <p class="dz-note">Chips are drawn a little larger than life in the garage view so the blend is easy to see. The close-up is true to size.</p>
         <p class="dz-note">Colours on screen are approximate. We’ll bring a physical sample before anything goes down, and confirm availability with your quote.</p>
         <textarea id="quote-text" rows="4" style="width:100%;font:13px var(--body);border:1px solid #33353b;border-radius:6px;padding:8px;background:var(--bg2);color:var(--text)" aria-label="Text to send with your quote request" hidden></textarea>
       </section>
@@ -247,108 +248,187 @@ function currentMix(){const b=blendById(state.blend);if(b.custom){const m=state.
 function dominant(mix){return mix.reduce((a,b)=>b[1]>a[1]?b:a)[0]}
 
 // ---------- flake texture ----------
-function flakeTile(size,{mix,bg,cover,chip,glitter,seed}){
+// One seamless tile of broadcast chips. Chips are irregular 5-7 sided shards laid down in random
+// order (so colours overlap each other the way a real broadcast does), each with a slight tone
+// shift, and, when `depth` is on, a soft shadow under its edge.
+function flakeTile(size,{mix,bg,cover,chip,glitter,seed,depth}){
   const cv=document.createElement("canvas");cv.width=cv.height=size;const x=cv.getContext("2d");
   x.fillStyle=bg;x.fillRect(0,0,size,size);
   const r=rng(seed);const total=mix.reduce((s,m)=>s+m[1],0);
   const pick=()=>{let v=r()*total;for(const [h,w] of mix){if((v-=w)<0)return h}return mix[0][0]};
   const area=chip*chip*0.55;const d={full:2.7,heavy:2.3,partial:1.05}[cover];
-  const n=Math.min(160000,Math.round(d*size*size/area));
-  const paths=new Map();
+  const n=Math.min(180000,Math.round(d*size*size/area));
+  const shadow=depth&&chip>=5,so=Math.max(.6,chip*.07);
+  const tones={};const tone=h=>{const k=Math.floor(r()*5),key=h+k;return tones[key]||(tones[key]=shade(h,(k-2)*.035))};
+  const pts=new Float32Array(14);
   for(let i=0;i<n;i++){
-    const h=pick();let p=paths.get(h);if(!p){p=new Path2D();paths.set(h,p)}
-    const cx=r()*size,cy=r()*size,rad=chip*(0.5+0.45*r()),a0=r()*6.283;
-    const pts=[];for(let j=0;j<4;j++){const a=a0+j*1.5708+(r()-.5)*.9,rr=rad*(0.6+0.45*r());pts.push([cx+rr*Math.cos(a),cy+rr*Math.sin(a)])}
+    const col=tone(pick());
+    const cx=r()*size,cy=r()*size,rad=chip*(0.5+0.45*r()),a0=r()*6.283,nv=5+Math.floor(r()*3);
+    for(let j=0;j<nv;j++){const a=a0+j*6.283/nv+(r()-.5)*.7,rr=rad*(0.55+0.5*r());pts[j*2]=cx+rr*Math.cos(a);pts[j*2+1]=cy+rr*Math.sin(a)}
     const offs=[[0,0]];if(cx<rad)offs.push([size,0]);if(cx>size-rad)offs.push([-size,0]);if(cy<rad)offs.push([0,size]);if(cy>size-rad)offs.push([0,-size]);
-    for(const [ox,oy] of offs){p.moveTo(pts[0][0]+ox,pts[0][1]+oy);for(let j=1;j<4;j++)p.lineTo(pts[j][0]+ox,pts[j][1]+oy);p.closePath()}
+    for(const [ox,oy] of offs){
+      if(shadow){x.fillStyle="rgba(0,0,0,.2)";x.beginPath();x.moveTo(pts[0]+ox+so,pts[1]+oy+so*1.3);for(let j=1;j<nv;j++)x.lineTo(pts[j*2]+ox+so,pts[j*2+1]+oy+so*1.3);x.closePath();x.fill()}
+      x.fillStyle=col;x.beginPath();x.moveTo(pts[0]+ox,pts[1]+oy);for(let j=1;j<nv;j++)x.lineTo(pts[j*2]+ox,pts[j*2+1]+oy);x.closePath();x.fill();
+    }
   }
-  for(const [h,p] of paths){x.fillStyle=h;x.fill(p)}
   const g=GLIT.find(q=>q[0]===glitter);
   if(g&&g[2]){const gn=Math.round(n*0.05),s=Math.max(1,chip*0.35);for(let i=0;i<gn;i++){x.fillStyle=g[2][Math.floor(r()*g[2].length)];x.fillRect(r()*size,r()*size,s,s)}}
   return cv;
 }
-function flakeOpts(chipScale){
-  const mix=currentMix();const chip={"1/4":1,"1/8":0.52,"1/16":0.3}[state.size]*chipScale;
+function flakeOpts(chipPx,depth){
+  const mix=currentMix();const chip={"1/4":1,"1/8":0.52,"1/16":0.3}[state.size]*chipPx;
   const base=(BASES.find(b=>b[0]===state.base)||BASES[1])[1];
-  return{mix,bg:state.cover==="full"?dominant(mix):base,cover:state.cover,chip:Math.max(1.4,chip),glitter:state.glitter,seed:state.blend+state.size+state.cover+state.mix.join("")};
+  return{mix,bg:state.cover==="full"?dominant(mix):base,cover:state.cover,chip:Math.max(1.4,chip),glitter:state.glitter,depth,seed:state.blend+state.size+state.cover+state.mix.join("")};
 }
 
 // ---------- metallic texture ----------
-function metallicField(w,h,baseHex,accHex,move,seed){
+// Domain-warped noise, coloured through a dark / base / pearl ramp with optional accent veins,
+// then lit from one side so the swirls read as depth under a clear coat. Positions are in
+// noise units (1 unit is about 6 ft of floor), so any view can ask for exactly the detail it needs.
+const UNIT=48;
+function metal(baseHex,accHex,move,seed){
   const r=rng(seed);const P=new Uint8Array(512);const perm=[...Array(256).keys()];for(let i=255;i>0;i--){const j=Math.floor(r()*(i+1));[perm[i],perm[j]]=[perm[j],perm[i]]}for(let i=0;i<512;i++)P[i]=perm[i&255];
   const V=new Float32Array(256);for(let i=0;i<256;i++)V[i]=r();
-  const sm=t=>t*t*(3-2*t);
+  const sm=t=>t*t*t*(t*(t*6-15)+10);
   function n2(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;const a=V[P[(xi&255)+P[yi&255]]],b=V[P[((xi+1)&255)+P[yi&255]]],c=V[P[(xi&255)+P[(yi+1)&255]]],d=V[P[((xi+1)&255)+P[(yi+1)&255]]];const u=sm(xf),v=sm(yf);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
-  const fbm=(x,y)=>{let s=0,a=.5,f=1;for(let o=0;o<4;o++){s+=a*n2(x*f,y*f);f*=2.03;a*=.5}return s/0.9375};
-  const warp={calm:1.6,flow:3.6,bold:6}[move],sc={calm:2.2,flow:2.8,bold:3.2}[move],con={calm:.7,flow:1,bold:1.35}[move];
+  // fbm with a fractional octave count, so detail fades out with distance instead of aliasing
+  const fbm=(x,y,n)=>{let s=0,w=0,a=.5,f=1;for(let o=0;o<n;o++){const k=n-o<1?n-o:1;s+=a*k*n2(x*f,y*f);w+=a*k;f*=2.03;a*=.5}return s/w};
+  const warp={calm:1.6,flow:3.6,bold:6}[move],con={calm:.7,flow:1,bold:1.35}[move],vk={calm:9,flow:12,bold:10}[move];
   const base=rgb(baseHex),acc=accHex?rgb(accHex):null;
   const lum=(base[0]*.3+base[1]*.59+base[2]*.11)/255;
   const light=base.map(c=>c+(255-c)*(lum>.8?.15:.42)),dark=base.map(c=>c*(lum<.15?.55:.62));
-  const img=new ImageData(w,h);const D=img.data;
-  for(let j=0;j<h;j++)for(let i=0;i<w;i++){
-    const x=i/w*sc*1.6,y=j/h*sc;
-    const qx=fbm(x,y),qy=fbm(x+5.2,y+1.3);
-    const rx=fbm(x+warp*qx+1.7,y+warp*qy+9.2),ry=fbm(x+warp*qx+8.3,y+warp*qy+2.8);
-    let v=fbm(x+warp*rx,y+warp*ry);v=Math.min(1,Math.max(0,.5+(v-.5)*1.8*con));
-    let c;
-    if(v<.45){const t=v/.45;c=dark.map((d,k)=>d+(base[k]-d)*t)}
-    else if(v<.62){const t=(v-.45)/.17;c=base.map((b,k)=>b+(light[k]-b)*t)}
-    else{const t=Math.min(1,(v-.62)/.38);c=light.map((l,k)=>l+(base[k]-l)*t*.6)}
-    if(acc){const vein=Math.max(0,1-Math.abs(rx-.55)*{calm:9,flow:12,bold:10}[move]);const m=Math.pow(vein,1.6)*.92;c=c.map((q,k)=>q+(acc[k]-q)*m)}
-    const o=(j*w+i)*4;D[o]=c[0];D[o+1]=c[1];D[o+2]=c[2];D[o+3]=255;
-  }
-  const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").putImageData(img,0,0);return cv;
+  const out=[0,0];
+  return{
+    at(x,y,oct){
+      const qx=fbm(x,y,3),qy=fbm(x+5.2,y+1.3,3);
+      const rx=fbm(x+warp*qx+1.7,y+warp*qy+9.2,3),ry=fbm(x+warp*qx+8.3,y+warp*qy+2.8,3);
+      const v=.5+(fbm(x+warp*rx,y+warp*ry,oct)-.5)*1.8*con;
+      out[0]=v<0?0:v>1?1:v;out[1]=acc?Math.pow(Math.max(0,1-Math.abs(rx-.55)*vk),1.6)*.92:0;return out;
+    },
+    // F = swirl value, A = vein strength, both w*h; returns RGBA bytes
+    paint(F,A,w,h,ek){
+      const D=new Uint8ClampedArray(w*h*4);
+      for(let j=0;j<h;j++)for(let i=0;i<w;i++){
+        const p=j*w+i,v=F[p];let c0,c1,c2;
+        if(v<.45){const t=v/.45;c0=dark[0]+(base[0]-dark[0])*t;c1=dark[1]+(base[1]-dark[1])*t;c2=dark[2]+(base[2]-dark[2])*t}
+        else if(v<.62){const t=(v-.45)/.17;c0=base[0]+(light[0]-base[0])*t;c1=base[1]+(light[1]-base[1])*t;c2=base[2]+(light[2]-base[2])*t}
+        else{const t=Math.min(1,(v-.62)/.38)*.6;c0=light[0]+(base[0]-light[0])*t;c1=light[1]+(base[1]-light[1])*t;c2=light[2]+(base[2]-light[2])*t}
+        if(acc){const m=A[p];c0+=(acc[0]-c0)*m;c1+=(acc[1]-c1)*m;c2+=(acc[2]-c2)*m}
+        let e=((F[j*w+(i?i-1:0)]-F[j*w+(i<w-1?i+1:i)])+(F[(j?j-1:0)*w+i]-F[(j<h-1?j+1:j)*w+i]))*ek;e=e>20?20:e<-20?-20:e;
+        const o=p*4;D[o]=c0+e;D[o+1]=c1+e;D[o+2]=c2+e;D[o+3]=255;
+      }
+      return D;
+    }
+  };
 }
-let metCache={key:"",cv:null};
-function metallicSurface(){
-  const key=state.metBase+"|"+state.metAccent+"|"+state.move;
-  if(metCache.key!==key){const b=MET.find(m=>m[0]===state.metBase)[1];const a=state.metAccent==="None"?null:MET.find(m=>m[0]===state.metAccent)[1];metCache={key,cv:metallicField(300,420,b,a,state.move,key)}}
-  return metCache.cv;
-}
+const cache={};
+function cached(slot,key,make){const c=cache[slot];if(c&&c.key===key)return c.val;const val=make();cache[slot]={key,val};return val}
+function metHex(){return[MET.find(m=>m[0]===state.metBase)[1],state.metAccent==="None"?null:MET.find(m=>m[0]===state.metAccent)[1]]}
+const metKey=()=>state.metBase+"|"+state.metAccent+"|"+state.move;
 
-// ---------- scene drawing ----------
-const scene=el("scene"),sx=scene.getContext("2d");const W=1200,H=750,Y0=318;
-function floorSource(){
-  const src=document.createElement("canvas");src.width=1600;src.height=2400;const x=src.getContext("2d");
-  if(state.finish==="flake"){const tile=flakeTile(256,flakeOpts(5.2));x.fillStyle=x.createPattern(tile,"repeat");x.fillRect(0,0,1600,2400)}
-  else{x.imageSmoothingQuality="high";x.drawImage(metallicSurface(),0,0,1600,2400)}
-  return src;
+// ---------- garage view: your floor composited into a photo ----------
+// The photo's own floor is replaced pixel by pixel: the texture is projected onto the ground
+// plane, then the photo's lighting (shadows, window and ceiling-light reflections) is put back
+// on top, so the new floor sits in the room the way the photographed one did.
+const scene=el("scene"),sx=scene.getContext("2d",{willReadFrequently:true});const W=1200,H=750;
+const CAM={yh:60,cx:600,f:700,h:62};   // horizon row, centre column, focal length (px), camera height (in)
+const PPI=64/3,BIG=2,REF=131;        // tile texels per inch, chip enlargement in this view, photo floor brightness
+const room={ready:false,failed:false};
+(function(){
+  const srcs=["img/designer/garage-room.jpg","img/designer/garage-light.jpg","img/designer/garage-mask.png"];let left=srcs.length;
+  const imgs=srcs.map(s=>{const i=new Image();i.onload=()=>{if(--left===0)init()};i.onerror=()=>{room.failed=true;render()};i.src=s;return i});
+  function init(){
+    try{
+      const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d",{willReadFrequently:true});
+      x.drawImage(imgs[1],0,0,W,H);let d=x.getImageData(0,0,W,H).data;const S=new Float32Array(W*H);for(let i=0;i<W*H;i++)S[i]=d[i*4]/110;
+      x.drawImage(imgs[2],0,0,W,H);d=x.getImageData(0,0,W,H).data;const M=new Uint8Array(W*H);let top=H;for(let i=0;i<W*H;i++){M[i]=d[i*4];if(M[i]&&top===H)top=Math.floor(i/W)}
+      Object.assign(room,{img:imgs[0],S,M,top,ready:true});
+    }catch(e){room.failed=true}
+    render();
+  }
+})();
+function pyramid(cv){
+  const L=[];let c=cv;
+  for(;;){const s=c.width;L.push({s,d:c.getContext("2d").getImageData(0,0,s,s).data});if(s<=8||s%2)break;
+    const n=document.createElement("canvas");n.width=n.height=s/2;const x=n.getContext("2d");x.imageSmoothingQuality="high";x.drawImage(c,0,0,s/2,s/2);c=n}
+  return L;
 }
 function drawRoom(){
-  const src=floorSource();
-  sx.clearRect(0,0,W,H);
-  const far=0.35,bx=(W-W*1.5*far)/2;
-  // ceiling + walls
-  let g=sx.createLinearGradient(0,0,0,Y0);g.addColorStop(0,"#C9C6C0");g.addColorStop(1,"#E3E0DA");sx.fillStyle=g;sx.fillRect(0,0,W,H);
-  const yEdge=Y0+(H-Y0)*((1/1.5-far)/(1-far));
-  sx.fillStyle="#D5D2CB";sx.beginPath();sx.moveTo(0,0);sx.lineTo(bx,40);sx.lineTo(bx,Y0);sx.lineTo(0,yEdge);sx.closePath();sx.fill();
-  sx.fillStyle="#CFCBC4";sx.beginPath();sx.moveTo(W,0);sx.lineTo(W-bx,40);sx.lineTo(W-bx,Y0);sx.lineTo(W,yEdge);sx.closePath();sx.fill();
-  sx.fillStyle="#BEBAB3";sx.fillRect(0,0,W,40);
-  // garage door on back wall
-  const dx=bx+30,dw=W-2*bx-60,dy=78;g=sx.createLinearGradient(0,dy,0,Y0);g.addColorStop(0,"#F3F2EF");g.addColorStop(1,"#E2E0DB");sx.fillStyle=g;sx.fillRect(dx,dy,dw,Y0-dy);
-  sx.strokeStyle="rgba(0,0,0,.14)";sx.lineWidth=2;for(let i=1;i<4;i++){const y=dy+(Y0-dy)*i/4;sx.beginPath();sx.moveTo(dx,y);sx.lineTo(dx+dw,y);sx.stroke()}
-  sx.strokeStyle="rgba(0,0,0,.08)";sx.lineWidth=1;for(let i=0;i<4;i++)for(let k=0;k<5;k++){const y=dy+(Y0-dy)*i/4+8,hh=(Y0-dy)/4-16,w=dw/5;sx.strokeRect(dx+k*w+8,y,w-16,hh)}
-  sx.fillStyle="#B9B5AD";sx.fillRect(dx-12,dy-10,dw+24,10);sx.fillRect(dx-12,dy-10,12,Y0-dy+10);sx.fillRect(dx+dw,dy-10,12,Y0-dy+10);
-  // floor with perspective, row by row
-  sx.imageSmoothingEnabled=true;sx.imageSmoothingQuality="high";
-  for(let y=Y0;y<H;y++){const t=(y-Y0)/(H-Y0),k=far+(1-far)*t,z=1/k,sy=Math.min(2399,2400*(1/far-z)/(1/far-1)),dw2=W*1.5*k;sx.drawImage(src,0,sy,1600,1,(W-dw2)/2,y,dw2,1.6)}
-  // light: reflection of the door, far shade, gloss
-  g=sx.createLinearGradient(0,Y0,0,H);g.addColorStop(0,"rgba(0,0,0,.28)");g.addColorStop(.35,"rgba(0,0,0,.06)");g.addColorStop(1,"rgba(0,0,0,.18)");sx.fillStyle=g;sx.fillRect(0,Y0,W,H-Y0);
-  g=sx.createRadialGradient(W/2,Y0+70,10,W/2,Y0+70,420);g.addColorStop(0,"rgba(255,255,255,.22)");g.addColorStop(1,"rgba(255,255,255,0)");sx.fillStyle=g;sx.fillRect(0,Y0,W,H-Y0);
-  sx.fillStyle="rgba(0,0,0,.25)";sx.fillRect(bx,Y0-3,W-2*bx,3);
+  sx.drawImage(room.img,0,0,W,H);
+  const id=sx.getImageData(0,0,W,H),D=id.data,S=room.S,M=room.M;
+  const flake=state.finish==="flake";let L,FD,FW,FH,gloss;
+  if(flake){
+    const o=flakeOpts(.25*BIG*PPI,true);const T={"1/4":1024,"1/8":768,"1/16":512}[state.size];
+    L=cached("pyr",o.seed+o.bg+o.glitter,()=>pyramid(flakeTile(T,o)));gloss=1.15;
+  }else{
+    const [b,a]=metHex();FW=W/2;FH=H/2;
+    FD=cached("metRoom",metKey(),()=>{
+      const m=metal(b,a,state.move,metKey()),F=new Float32Array(FW*FH),A=new Float32Array(FW*FH);
+      for(let j=Math.max(0,(room.top>>1)-1);j<FH;j++){
+        const d=Math.max(8,j*2+1-CAM.yh),ipp=CAM.h/d,Z=CAM.f*ipp,fp=2*CAM.f*CAM.h/(d*d);
+        const oct=Math.max(2,Math.min(5,Math.log(UNIT/(2*fp))/Math.log(2.03)+1));
+        for(let i=0;i<FW;i++){const q=m.at((i*2+1-CAM.cx)*ipp/UNIT+40,Z/UNIT,oct);F[j*FW+i]=q[0];A[j*FW+i]=q[1]}
+      }
+      return m.paint(F,A,FW,FH,55);
+    });gloss=1.25;
+  }
+  for(let y=room.top;y<H;y++){
+    const d=y-CAM.yh,ipp=CAM.h/d,z0=CAM.f*CAM.h/(d-.5),z1=CAM.f*CAM.h/(d+.5);
+    const taps=Math.max(1,Math.min(6,Math.round(CAM.f/d)));
+    let A,B2,sa,sb,t;
+    if(flake){let l=Math.log2(ipp*PPI);l=l<0?0:l>L.length-1?L.length-1:l;const l0=l|0,l1=Math.min(L.length-1,l0+1);t=l-l0;A=L[l0];B2=L[l1];sa=PPI/(1<<l0);sb=PPI/(1<<l1)}
+    for(let x=0;x<W;x++){
+      const i=y*W+x,m=M[i];if(!m)continue;
+      const X=(x-CAM.cx)*ipp;let r=0,g=0,b=0;
+      for(let k=0;k<taps;k++){
+        const Z=z0+(z1-z0)*(k+.5)/taps;
+        if(flake){
+          let u=Math.floor(X*sa)%A.s,v=Math.floor(Z*sa)%A.s;if(u<0)u+=A.s;let p=(v*A.s+u)*4;
+          const r0=A.d[p],g0=A.d[p+1],b0=A.d[p+2];
+          u=Math.floor(X*sb)%B2.s;v=Math.floor(Z*sb)%B2.s;if(u<0)u+=B2.s;p=(v*B2.s+u)*4;
+          r+=r0+(B2.d[p]-r0)*t;g+=g0+(B2.d[p+1]-g0)*t;b+=b0+(B2.d[p+2]-b0)*t;
+        }else{
+          let u=x/2-.25,v=(y+(k+.5)/taps-.5)/2-.25;u=u<0?0:u>FW-1.001?FW-1.001:u;v=v<0?0:v>FH-1.001?FH-1.001:v;
+          const u0=u|0,v0=v|0,fu=u-u0,fv=v-v0,p=(v0*FW+u0)*4,q=p+FW*4;
+          const w00=(1-fu)*(1-fv),w10=fu*(1-fv),w01=(1-fu)*fv,w11=fu*fv;
+          r+=FD[p]*w00+FD[p+4]*w10+FD[q]*w01+FD[q+4]*w11;g+=FD[p+1]*w00+FD[p+5]*w10+FD[q+1]*w01+FD[q+5]*w11;b+=FD[p+2]*w00+FD[p+6]*w10+FD[q+2]*w01+FD[q+6]*w11;
+        }
+      }
+      const s=S[i],dif=(s<1?s:1)/taps,add=s>1?(s-1)*REF*gloss:0,a=m/255,o=i*4;
+      D[o]+=(r*dif+add-D[o])*a;D[o+1]+=(g*dif+add-D[o+1])*a;D[o+2]+=(b*dif+add-D[o+2])*a;
+    }
+  }
+  sx.putImageData(id,0,0);
 }
 function drawClose(){
-  sx.clearRect(0,0,W,H);
-  if(state.finish==="flake"){const tile=flakeTile(400,flakeOpts(12.5));sx.fillStyle=sx.createPattern(tile,"repeat");sx.fillRect(0,0,W,H)}
-  else{sx.imageSmoothingQuality="high";const s=metallicSurface();sx.drawImage(s,0,0,s.width,s.height*0.62,0,0,W,H)}
-  const g=sx.createLinearGradient(0,0,W,H);g.addColorStop(0,"rgba(255,255,255,.16)");g.addColorStop(.45,"rgba(255,255,255,0)");g.addColorStop(1,"rgba(0,0,0,.12)");sx.fillStyle=g;sx.fillRect(0,0,W,H);
-  sx.fillStyle="rgba(20,20,22,.72)";sx.fillRect(W-196,H-46,180,30);sx.fillStyle="#EEEAE2";sx.font="600 16px Inter, sans-serif";sx.fillText("About 24″ across",W-180,H-25);
+  sx.clearRect(0,0,W,H);let label;
+  if(state.finish==="flake"){
+    const o=flakeOpts(12.5,true);const tile=cached("close",o.seed+o.bg+o.glitter,()=>flakeTile(1024,o));
+    sx.fillStyle=sx.createPattern(tile,"repeat");sx.fillRect(0,0,W,H);label="About 24″ across";
+  }else{
+    const [b,a]=metHex();const s=cached("metClose",metKey(),()=>{
+      const w=900,h=562,m=metal(b,a,state.move,metKey()),F=new Float32Array(w*h),A=new Float32Array(w*h),sc=72/UNIT/w;
+      for(let j=0;j<h;j++)for(let i=0;i<w;i++){const q=m.at(40+(i-w/2)*sc,2.2+(j-h/2)*sc,7);F[j*w+i]=q[0];A[j*w+i]=q[1]}
+      const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").putImageData(new ImageData(m.paint(F,A,w,h,700),w,h),0,0);return cv;
+    });
+    sx.imageSmoothingQuality="high";sx.drawImage(s,0,0,W,H);label="About 6 ft across";
+  }
+  // clear-coat light: a soft window glare, a fall-off toward the far corner, a vignette
+  sx.save();sx.translate(330,150);sx.rotate(-.32);sx.scale(2.7,1);
+  let g=sx.createRadialGradient(0,0,0,0,0,170);g.addColorStop(0,"rgba(255,255,255,.26)");g.addColorStop(.55,"rgba(255,255,255,.08)");g.addColorStop(1,"rgba(255,255,255,0)");sx.fillStyle=g;sx.fillRect(-200,-200,400,400);sx.restore();
+  g=sx.createLinearGradient(0,0,W,H);g.addColorStop(0,"rgba(255,255,255,.08)");g.addColorStop(.45,"rgba(255,255,255,0)");g.addColorStop(1,"rgba(0,0,0,.16)");sx.fillStyle=g;sx.fillRect(0,0,W,H);
+  g=sx.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,W*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.3)");sx.fillStyle=g;sx.fillRect(0,0,W,H);
+  sx.font="600 16px Inter, sans-serif";const tw=sx.measureText(label).width;
+  sx.fillStyle="rgba(20,20,22,.72)";sx.fillRect(W-tw-48,H-46,tw+32,30);sx.fillStyle="#EEEAE2";sx.fillText(label,W-tw-32,H-25);
 }
 let pending=0;
 function render(){
-  el("busy").hidden=false;const id=++pending;
-  requestAnimationFrame(()=>setTimeout(()=>{if(id!==pending)return;(state.view==="room"?drawRoom:drawClose)();el("busy").hidden=true},10));
   summary();save();
+  const roomView=state.view==="room"&&!room.failed;
+  el("busy").hidden=false;el("busy").textContent=roomView&&!room.ready?"Loading…":"Updating…";
+  if(roomView&&!room.ready)return;
+  const id=++pending;
+  requestAnimationFrame(()=>setTimeout(()=>{if(id!==pending)return;(roomView?drawRoom:drawClose)();el("busy").hidden=true},10));
 }
 
 // ---------- UI builders ----------
