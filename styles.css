@@ -400,3 +400,5 @@ body{padding-bottom:82px}
 @media (max-width:640px){.photo-actions .btn{flex:1 1 140px;text-align:center}}
 .photo-card .photo-msg{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.92rem;color:var(--text)}
 .photo-card .photo-msg a{color:var(--text);overflow-wrap:anywhere}
+.reviews-head .review-cta{color:var(--muted);font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
+.reviews-head .review-cta:hover{color:var(--text)}
