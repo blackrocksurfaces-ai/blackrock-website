@@ -402,3 +402,18 @@ body{padding-bottom:82px}
 .photo-card .photo-msg a{color:var(--text);overflow-wrap:anywhere}
 .reviews-head .review-cta{color:var(--muted);font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
 .reviews-head .review-cta:hover{color:var(--text)}
+/* epoxy floor guide */
+.prose-guide>*{max-width:820px}
+.prose-guide h2{font-size:1.45rem;margin:46px 0 14px}
+.prose-guide h2:first-child{margin-top:0}
+.prose-guide p{color:var(--muted);font-size:1.05rem;line-height:1.7;margin:0 0 14px}
+.prose-guide p a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
+.prose-guide .table-scroll{margin:6px 0 16px}
+.guide .prose-guide td:first-child{width:auto;white-space:nowrap}
+/* about: at a glance */
+.glance{margin:34px 0 0;background:var(--bg3);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px}
+.glance h2{font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--steel2);margin:0 0 12px}
+.glance dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:10px 22px;margin:0}
+.glance dt{color:var(--steel2);font-family:var(--head);font-weight:500}
+.glance dd{margin:0;color:var(--text);overflow-wrap:anywhere}
+@media (max-width:520px){.glance dl{grid-template-columns:1fr;gap:2px}.glance dd{margin-bottom:10px}}
