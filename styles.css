@@ -385,3 +385,15 @@ body{padding-bottom:82px}
   .floor-row,.floor-row.flip{grid-template-columns:1fr}
   .split:has(> img.rounded),.split:has(> a > img.rounded),.split:has(> div > img.rounded){grid-template-columns:1fr}
 }
+/* text-us-photos card beside the quote form */
+.quote-side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.photo-card{background:var(--bg3);border:1px solid #5a5d64;border-radius:var(--radius);padding:24px 26px;display:flex;flex-direction:column;gap:10px}
+.photo-head{display:flex;align-items:center;gap:12px}
+.photo-head h3{margin:0;font-size:1.2rem}
+.photo-card .cam{flex:none;color:var(--steel)}
+.photo-card p{margin:0;color:var(--muted)}
+.photo-card .photo-btn{align-self:flex-start;margin-top:6px}
+.photo-card .photo-num strong{color:var(--text);font-family:var(--head);letter-spacing:.03em}
+.photo-card .photo-alt{font-size:.88rem}
+.photo-card .photo-alt a{color:var(--text);overflow-wrap:anywhere}
+@media (max-width:640px){.photo-card .photo-btn{align-self:stretch;text-align:center}}
