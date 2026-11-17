@@ -89,7 +89,7 @@ def local_target(ref):
 
 def main():
     checks = []
-    pages = sorted(p for p in ROOT.glob("*.html"))
+    pages = sorted(p for p in ROOT.glob("*.html") if not p.name.startswith("google"))
     missing, html_problems, contact_missing, form_problems, big_images = [], [], [], [], []
     versions = {}
     external = set()
