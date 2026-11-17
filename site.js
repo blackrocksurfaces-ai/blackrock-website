@@ -147,3 +147,31 @@
   // never leave anything hidden if the observer is slow to fire
   setTimeout(function () { items.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top < window.innerHeight) el.classList.add('in'); }); }, 1200);
 })();
+
+// "Text photos" button: phones open their messaging app; on a computer (where text links do nothing)
+// copy the number and explain instead.
+(function () {
+  var isPhone = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 1 && window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  document.querySelectorAll('.photo-btn').forEach(function (btn) {
+    var card = btn.closest('.photo-card');
+    var msg = document.createElement('p');
+    msg.className = 'photo-msg';
+    msg.setAttribute('role', 'status');
+    msg.hidden = true;
+    btn.insertAdjacentElement('afterend', msg);
+    btn.addEventListener('click', function (e) {
+      if (isPhone) return;
+      e.preventDefault();
+      var done = function (copied) {
+        msg.innerHTML = (copied ? '<strong>Number copied.</strong> ' : '') +
+          'Texting works from your phone: send your photos to <strong>403-866-2915</strong>, ' +
+          'or email them to <a href="mailto:blackrocksurfaces@gmail.com?subject=Photos%20for%20my%20floor%20quote">blackrocksurfaces@gmail.com</a>.';
+        msg.hidden = false;
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('403-866-2915').then(function () { done(true); }, function () { done(false); });
+      } else { done(false); }
+    });
+  });
+})();
