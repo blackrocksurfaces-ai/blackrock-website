@@ -392,10 +392,11 @@ body{padding-bottom:82px}
 .photo-head h3{margin:0;font-size:1.2rem}
 .photo-card .cam{flex:none;color:var(--steel)}
 .photo-card p{margin:0;color:var(--muted)}
-.photo-card .photo-btn{align-self:flex-start;margin-top:6px}
+.photo-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
 .photo-card .photo-num strong{color:var(--text);font-family:var(--head);letter-spacing:.03em}
+.photo-card .photo-addr{overflow-wrap:anywhere}
 .photo-card .photo-alt{font-size:.88rem}
 .photo-card .photo-alt a{color:var(--text);overflow-wrap:anywhere}
-@media (max-width:640px){.photo-card .photo-btn{align-self:stretch;text-align:center}}
+@media (max-width:640px){.photo-actions .btn{flex:1 1 140px;text-align:center}}
 .photo-card .photo-msg{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.92rem;color:var(--text)}
 .photo-card .photo-msg a{color:var(--text);overflow-wrap:anywhere}

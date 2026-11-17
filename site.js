@@ -148,30 +148,45 @@
   setTimeout(function () { items.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top < window.innerHeight) el.classList.add('in'); }); }, 1200);
 })();
 
-// "Text photos" button: phones open their messaging app; on a computer (where text links do nothing)
-// copy the number and explain instead.
+// "Text photos" / "Email photos" buttons. Phones open their messaging app; on a computer (where text
+// links do nothing) copy the number and explain. The email button opens the mail app and also copies
+// the address, for computers with no mail app set up.
 (function () {
   var isPhone = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
     (navigator.maxTouchPoints > 1 && window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-  document.querySelectorAll('.photo-btn').forEach(function (btn) {
-    var card = btn.closest('.photo-card');
+  var EMAIL_LINK = '<a href="mailto:blackrocksurfaces@gmail.com?subject=Photos%20for%20my%20floor%20quote">blackrocksurfaces@gmail.com</a>';
+  function copy(text, then) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { then(true); }, function () { then(false); });
+    } else { then(false); }
+  }
+  document.querySelectorAll('.photo-card').forEach(function (card) {
+    var actions = card.querySelector('.photo-actions');
     var msg = document.createElement('p');
     msg.className = 'photo-msg';
     msg.setAttribute('role', 'status');
     msg.hidden = true;
-    btn.insertAdjacentElement('afterend', msg);
-    btn.addEventListener('click', function (e) {
+    (actions || card.querySelector('.photo-btn')).insertAdjacentElement('afterend', msg);
+    function show(html) { msg.innerHTML = html; msg.hidden = false; }
+
+    var text = card.querySelector('.photo-btn');
+    if (text) text.addEventListener('click', function (e) {
       if (isPhone) return;
       e.preventDefault();
-      var done = function (copied) {
-        msg.innerHTML = (copied ? '<strong>Number copied.</strong> ' : '') +
-          'Texting works from your phone: send your photos to <strong>403-866-2915</strong>, ' +
-          'or email them to <a href="mailto:blackrocksurfaces@gmail.com?subject=Photos%20for%20my%20floor%20quote">blackrocksurfaces@gmail.com</a>.';
-        msg.hidden = false;
-      };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText('403-866-2915').then(function () { done(true); }, function () { done(false); });
-      } else { done(false); }
+      copy('403-866-2915', function (ok) {
+        show((ok ? '<strong>Number copied.</strong> ' : '') +
+          'Texting works from your phone: send your photos to <strong>403-866-2915</strong>, or email them to ' + EMAIL_LINK + '.');
+      });
+    });
+
+    var mail = card.querySelector('.photo-email');
+    if (mail) mail.addEventListener('click', function () {
+      if (isPhone) return;
+      copy('blackrocksurfaces@gmail.com', function (ok) {
+        show('Your email app should open with a new message to us. ' +
+          (ok ? '<strong>We also copied our address</strong>, so if it doesn\'t open, paste it into a new email in Gmail, Outlook or whatever you use.'
+              : 'If it doesn\'t open, send your photos to <strong>blackrocksurfaces@gmail.com</strong>.'));
+      });
     });
   });
 })();
