@@ -26,11 +26,13 @@
     });
   }
 
-  // Quote form: sends to FormSubmit, which emails the request to you.
+  // Quote form: sends to Web3Forms, which emails the request to blackrocksurfaces@gmail.com.
   var form = document.getElementById('quote');
   if (!form) return;
   var note = document.getElementById('formNote');
   var btn = form.querySelector('button[type=submit]');
+  var FALLBACK = 'Please call or text <a href="tel:+14038662915">403-866-2915</a> or email ' +
+    '<a href="mailto:blackrocksurfaces@gmail.com">blackrocksurfaces@gmail.com</a> and we\'ll get right back to you.';
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -47,23 +49,28 @@
     }
     btn.disabled = true;
     btn.textContent = 'Sending...';
+    note.textContent = '';
+    // Give up after 15 seconds so nobody is left waiting on a stuck request.
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
     fetch(form.action, {
       method: 'POST',
       body: new FormData(form),
-      headers: { Accept: 'application/json' }
+      headers: { Accept: 'application/json' },
+      signal: ctl ? ctl.signal : undefined
     }).then(function (res) {
-      return res.json().then(function (j) { if (!res.ok || String(j.success) !== "true") throw new Error("send failed"); });
+      return res.json().then(function (j) { if (!res.ok || String(j.success) !== 'true') throw new Error('send failed'); });
     }).then(function () {
+      clearTimeout(timer);
       form.innerHTML =
         '<div class="form-done"><h3>Thanks, your request is in.</h3>' +
         '<p>We\'ll be in touch shortly to book your free quote. Need us sooner? Call or text ' +
         '<a href="tel:+14038662915">403-866-2915</a>.</p></div>';
     }).catch(function () {
+      clearTimeout(timer);
       btn.disabled = false;
       btn.textContent = 'Send quote request';
-      note.innerHTML = 'Something went wrong sending your request. Please call or text ' +
-        '<a href="tel:+14038662915">403-866-2915</a> or email ' +
-        '<a href="mailto:blackrocksurfaces@gmail.com">blackrocksurfaces@gmail.com</a>.';
+      note.innerHTML = 'Sorry, your request didn\'t go through. ' + FALLBACK;
     });
   });
 })();

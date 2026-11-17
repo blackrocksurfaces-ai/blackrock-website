@@ -236,11 +236,11 @@
 
     <p class="lead">Send the details and we'll get back to you to book a free on-site measure. Prefer to talk? Call or text <a href="tel:+14038662915">403-866-2915</a>.</p>
     <div class="split contact mt">
-    <form id="quote" class="form" action="https://formsubmit.co/ajax/7c59a84eb715c0507be6e21f9f8af53b" method="POST" novalidate>
-      <input type="hidden" name="_subject" value="New quote request - BlackRock Surface Co.">
-      <input type="hidden" name="_template" value="table">
-      <input type="hidden" name="_captcha" value="false">
-      <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+    <form id="quote" class="form" action="https://api.web3forms.com/submit" method="POST" novalidate>
+      <input type="hidden" name="access_key" value="__WEB3FORMS_KEY__">
+      <input type="hidden" name="subject" value="New quote request - BlackRock Surface Co.">
+      <input type="hidden" name="from_name" value="BlackRock Surface Co. website">
+      <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
       <div class="row2">
         <label>Name<input name="name" required autocomplete="name"></label>
         <label>Phone<input name="phone" type="tel" required autocomplete="tel"></label>
